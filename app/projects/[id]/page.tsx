@@ -193,7 +193,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               )}
 
               {/* Links */}
-              <Card>
+              <Card className='mt-6'>
                 <CardHeader>
                   <CardTitle>Resources</CardTitle>
                 </CardHeader>

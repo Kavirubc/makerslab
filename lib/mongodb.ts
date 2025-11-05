@@ -29,10 +29,11 @@ const { uri, dbName: defaultDbName } = buildMongoUriFromEnv()
 
 const options = {
   maxPoolSize: 10,
-  minPoolSize: 5,
-  maxIdleTimeMS: 30000,
-  serverSelectionTimeoutMS: 5000,
+  minPoolSize: 2,
+  maxIdleTimeMS: 60000,
+  serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
+  connectTimeoutMS: 30000,
 }
 
 let client: MongoClient

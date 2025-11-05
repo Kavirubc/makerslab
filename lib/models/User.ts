@@ -10,6 +10,12 @@ export interface User {
   universityId: ObjectId // Reference to University
   emailVerified?: Date | null
   image?: string | null
+  profilePicture?: string | null // Firebase Storage URL
+  bio?: string | null // User bio/about section
+  cv?: string | null // Firebase Storage URL for CV/Resume
+  cvUpdatedAt?: Date | null // Last CV update timestamp
+  linkedin?: string | null // LinkedIn profile URL
+  github?: string | null // GitHub profile URL
   createdAt: Date
   updatedAt: Date
 }
@@ -23,6 +29,12 @@ export interface UserWithoutPassword extends Omit<User, 'password'> {
   universityId: ObjectId
   emailVerified?: Date | null
   image?: string | null
+  profilePicture?: string | null
+  bio?: string | null
+  cv?: string | null
+  cvUpdatedAt?: Date | null
+  linkedin?: string | null
+  github?: string | null
   createdAt: Date
   updatedAt: Date
 }

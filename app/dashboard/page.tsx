@@ -7,7 +7,8 @@ import { Project } from '@/lib/models/Project'
 import { ObjectId } from 'mongodb'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
-import { Eye } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Eye, Edit } from 'lucide-react'
 
 export default async function Dashboard() {
   const session = await auth()
@@ -59,8 +60,18 @@ export default async function Dashboard() {
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>Your account details</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Profile Information</CardTitle>
+                  <CardDescription>Your account details</CardDescription>
+                </div>
+                <Link href="/profile/edit">
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </Link>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1">
@@ -104,48 +115,79 @@ export default async function Dashboard() {
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Projects</CardTitle>
-            <CardDescription>Your latest projects and updates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentProjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">
-                No projects yet. Start by creating your first project!
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {recentProjects.map((project) => (
-                  <Link
-                    key={project._id!.toString()}
-                    href={`/projects/${project._id!.toString()}`}
-                    className="block p-4 rounded-lg border hover:border-primary hover:bg-accent transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold">{project.title}</h3>
-                          <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
-                            {project.status}
-                          </Badge>
-                          <Badge variant="outline">{project.category}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {project.description}
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Eye className="h-3 w-3" />
-                          <span>{project.views} views</span>
-                        </div>
-                      </div>
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Recent Projects</h2>
+            <Link href="/projects">
+              <Button variant="outline" size="sm">View All</Button>
+            </Link>
+          </div>
+
+          {recentProjects.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  No projects yet. Start by creating your first project!
+                </p>
+                <Link href="/projects/new">
+                  <Button>Create Your First Project</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentProjects.map((project) => (
+                <Card key={project._id!.toString()} className="flex flex-col">
+                  <CardHeader>
+                    <div className="flex justify-between items-start mb-2">
+                      <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
+                        {project.status}
+                      </Badge>
+                      <Badge variant="outline">{project.category}</Badge>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    <CardTitle className="line-clamp-1">{project.title}</CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {project.tags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {project.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{project.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex gap-2 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {project.views}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {project.teamMembers.length} member
+                        {project.teamMembers.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </CardContent>
+                  <CardContent className="pt-0">
+                    <Link href={`/projects/${project._id!.toString()}`}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Project
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

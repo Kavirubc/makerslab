@@ -7,8 +7,10 @@ import { ObjectId } from 'mongodb'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Mail, MapPin, School, Eye } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Mail, MapPin, School, Eye, Linkedin, Github, FileText, Edit } from 'lucide-react'
 import Link from 'next/link'
+import { auth } from '@/auth'
 
 interface ProfilePageProps {
   params: Promise<{
@@ -22,6 +24,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   if (!ObjectId.isValid(id)) {
     notFound()
   }
+
+  const session = await auth()
+  const isOwner = session?.user?.id === id
 
   const db = await getDatabase()
 
@@ -56,38 +61,46 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="flex-shrink-0">
-                  <div className="w-24 h-24 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-3xl font-bold">
-                    {user.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .toUpperCase()
-                      .slice(0, 2)}
-                  </div>
+                  <Avatar className="w-32 h-32">
+                    <AvatarImage src={user.profilePicture || undefined} alt={user.name} />
+                    <AvatarFallback className="text-3xl">
+                      {user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
 
-                <div className="flex-grow">
-                  <h1 className="text-3xl font-bold mb-2">{user.name}</h1>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      {user.email}
+                <div className="flex-grow space-y-4">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-2">{user.name}</h1>
+                    {user.bio && (
+                      <p className="text-muted-foreground mb-4">{user.bio}</p>
+                    )}
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        {user.email}
+                      </div>
+                      {university && (
+                        <div className="flex items-center gap-2">
+                          <School className="h-4 w-4" />
+                          {university.name}
+                        </div>
+                      )}
+                      {university && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          {university.district}, {university.province}
+                        </div>
+                      )}
                     </div>
-                    {university && (
-                      <div className="flex items-center gap-2">
-                        <School className="h-4 w-4" />
-                        {university.name}
-                      </div>
-                    )}
-                    {university && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        {university.district}, {university.province}
-                      </div>
-                    )}
                   </div>
 
-                  <div className="flex gap-4 mt-4">
+                  <div className="flex gap-4">
                     <div>
                       <p className="text-2xl font-bold">{projects.length}</p>
                       <p className="text-sm text-muted-foreground">Projects</p>
@@ -97,17 +110,68 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       <p className="text-sm text-muted-foreground">Total Views</p>
                     </div>
                   </div>
+
+                  {/* Social Links and CV */}
+                  <div className="flex flex-wrap gap-2">
+                    {user.linkedin && (
+                      <a
+                        href={user.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline" size="sm">
+                          <Linkedin className="h-4 w-4 mr-2" />
+                          LinkedIn
+                        </Button>
+                      </a>
+                    )}
+                    {user.github && (
+                      <a
+                        href={user.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline" size="sm">
+                          <Github className="h-4 w-4 mr-2" />
+                          GitHub
+                        </Button>
+                      </a>
+                    )}
+                    {user.cv && (
+                      <a
+                        href={user.cv}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline" size="sm">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Download CV
+                        </Button>
+                      </a>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <div className="text-sm">
-                    <p className="text-muted-foreground">Index Number</p>
-                    <p className="font-medium">{user.indexNumber}</p>
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <div className="text-sm">
+                      <p className="text-muted-foreground">Index Number</p>
+                      <p className="font-medium">{user.indexNumber}</p>
+                    </div>
+                    <div className="text-sm">
+                      <p className="text-muted-foreground">Registration Number</p>
+                      <p className="font-medium">{user.registrationNumber}</p>
+                    </div>
                   </div>
-                  <div className="text-sm">
-                    <p className="text-muted-foreground">Registration Number</p>
-                    <p className="font-medium">{user.registrationNumber}</p>
-                  </div>
+
+                  {isOwner && (
+                    <Link href="/profile/edit">
+                      <Button variant="outline" className="w-full">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </CardContent>
