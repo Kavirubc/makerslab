@@ -1,11 +1,39 @@
 import { MongoClient, Db } from 'mongodb'
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your MongoDB URI to .env.local')
+function buildMongoUriFromEnv(): { uri: string; dbName: string } {
+  const username = process.env.MongoUsername
+  const password = process.env.MongoPassword
+  const cluster = process.env.cluster
+  const dbName = process.env.dbName
+  const authSource = process.env.authSource || 'admin'
+  const authMechanism = process.env.authMechanism || 'SCRAM-SHA-1'
+  const localUri = process.env.MONGODB_URI
+
+  // If direct URI is provided, use it
+  if (localUri) {
+    return { uri: localUri, dbName: dbName || 'ucsc-project-share' }
+  }
+
+  // Otherwise, build URI from parameters
+  if (!username || !password || !cluster || !dbName) {
+    throw new Error(
+      'Missing MongoDB configuration. Provide either MONGODB_URI or (MongoUsername, MongoPassword, cluster, dbName)'
+    )
+  }
+
+  const uri = `mongodb+srv://${username}:${password}@${cluster}/${dbName}?retryWrites=true&w=majority&authSource=${authSource}&authMechanism=${authMechanism}`
+  return { uri, dbName }
 }
 
-const uri = process.env.MONGODB_URI
-const options = {}
+const { uri, dbName: defaultDbName } = buildMongoUriFromEnv()
+
+const options = {
+  maxPoolSize: 10,
+  minPoolSize: 5,
+  maxIdleTimeMS: 30000,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+}
 
 let client: MongoClient
 let clientPromise: Promise<MongoClient>
@@ -34,5 +62,5 @@ export default clientPromise
 
 export async function getDatabase(): Promise<Db> {
   const client = await clientPromise
-  return client.db()
+  return client.db(defaultDbName)
 }

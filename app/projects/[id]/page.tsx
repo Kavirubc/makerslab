@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Eye, ExternalLink, Github, FileText, Video, Calendar, Users, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { VideoEmbed } from '@/components/video-embed'
+import ReactMarkdown from 'react-markdown'
 
 interface ProjectPageProps {
   params: Promise<{
@@ -99,7 +100,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   <CardTitle>About this Project</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="whitespace-pre-wrap">{project.description}</p>
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{project.description}</ReactMarkdown>
+                  </div>
                 </CardContent>
               </Card>
 

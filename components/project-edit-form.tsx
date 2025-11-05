@@ -33,27 +33,31 @@ interface TeamMember {
   userId?: string
 }
 
-export function ProjectForm() {
+interface ProjectEditFormProps {
+  project: any
+}
+
+export function ProjectEditForm({ project }: ProjectEditFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   // Form state
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  const [title, setTitle] = useState(project.title || '')
+  const [description, setDescription] = useState(project.description || '')
+  const [category, setCategory] = useState(project.category || '')
+  const [tags, setTags] = useState<string[]>(project.tags || [])
   const [tagInput, setTagInput] = useState('')
 
-  const [slidesDeckUrl, setSlidesDeckUrl] = useState('')
-  const [pitchVideoUrl, setPitchVideoUrl] = useState('')
-  const [demoUrl, setDemoUrl] = useState('')
-  const [githubUrl, setGithubUrl] = useState('')
+  const [slidesDeckUrl, setSlidesDeckUrl] = useState(project.slidesDeckUrl || '')
+  const [pitchVideoUrl, setPitchVideoUrl] = useState(project.pitchVideoUrl || '')
+  const [demoUrl, setDemoUrl] = useState(project.demoUrl || '')
+  const [githubUrl, setGithubUrl] = useState(project.githubUrl || '')
 
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(project.teamMembers || [])
 
-  const [status, setStatus] = useState<'completed' | 'in-progress'>('completed')
-  const [isPublic, setIsPublic] = useState(true)
+  const [status, setStatus] = useState<'completed' | 'in-progress'>(project.status || 'completed')
+  const [isPublic, setIsPublic] = useState(project.isPublic !== false)
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -72,8 +76,8 @@ export function ProjectForm() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
+      const response = await fetch(`/api/projects/${project._id}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
@@ -92,10 +96,10 @@ export function ProjectForm() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to create project')
+        throw new Error(data.error || 'Failed to update project')
       }
 
-      router.push('/projects')
+      router.push(`/projects/${project._id}`)
       router.refresh()
     } catch (err: any) {
       setError(err.message)
@@ -271,7 +275,7 @@ export function ProjectForm() {
 
       <div className="flex gap-4">
         <Button type="submit" disabled={isLoading} className="flex-1">
-          {isLoading ? 'Creating...' : 'Create Project'}
+          {isLoading ? 'Updating...' : 'Update Project'}
         </Button>
         <Button
           type="button"
