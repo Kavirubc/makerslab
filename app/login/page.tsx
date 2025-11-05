@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,7 +9,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function Login() {
+function LoginForm() {
     const [email, setEmail] = React.useState('')
     const [password, setPassword] = React.useState('')
     const [error, setError] = React.useState('')
@@ -117,5 +117,23 @@ export default function Login() {
                 </Card>
             </div>
         </div>
+    )
+}
+
+export default function Login() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <Card className="w-full max-w-md mx-auto">
+                        <CardHeader className="space-y-1">
+                            <CardTitle className="text-2xl font-bold">Loading...</CardTitle>
+                        </CardHeader>
+                    </Card>
+                </div>
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }
