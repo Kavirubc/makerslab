@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UCSC Project Share",
+  title: "Showcase LK",
   description: "A platform for university students to share and collaborate on projects",
 };
 

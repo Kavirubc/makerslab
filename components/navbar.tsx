@@ -12,7 +12,7 @@ export async function Navbar() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold text-base sm:text-xl">UCSC Project Share</span>
+            <span className="font-bold text-base sm:text-xl">Showcase.lk</span>
           </Link>
           {session && (
             <nav className="hidden md:flex items-center gap-6 text-sm">

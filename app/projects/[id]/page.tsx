@@ -6,8 +6,9 @@ import { ObjectId } from 'mongodb'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Eye, ExternalLink, Github, FileText, Video, Calendar, Users } from 'lucide-react'
+import { Eye, ExternalLink, Github, FileText, Video, Calendar, Users, Globe } from 'lucide-react'
 import Link from 'next/link'
+import { VideoEmbed } from '@/components/video-embed'
 
 interface ProjectPageProps {
   params: Promise<{
@@ -73,6 +74,21 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </span>
             </div>
           </div>
+
+          {/* Pitch Video */}
+          {project.pitchVideoUrl && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-5 w-5" />
+                  Project Pitch Video
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <VideoEmbed url={project.pitchVideoUrl} />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -159,59 +175,84 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* Primary Action */}
+              {project.demoUrl && (
+                <a
+                  href={project.demoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button size="lg" className="w-full">
+                    <Globe className="h-5 w-5 mr-2" />
+                    View Live Demo
+                  </Button>
+                </a>
+              )}
+
               {/* Links */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Project Links</CardTitle>
+                  <CardTitle>Resources</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2">
                   {project.githubUrl && (
                     <a
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 hover:bg-accent rounded-md transition-colors group"
                     >
-                      <Button variant="outline" className="w-full justify-start">
-                        <Github className="h-4 w-4 mr-2" />
-                        View Code
-                      </Button>
+                      <div className="p-2 rounded-md bg-muted group-hover:bg-background">
+                        <Github className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Source Code</p>
+                        <p className="text-xs text-muted-foreground">View on GitHub</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </a>
                   )}
-                  {project.demoUrl && (
-                    <a
-                      href={project.demoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button variant="outline" className="w-full justify-start">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Live Demo
-                      </Button>
-                    </a>
-                  )}
+
                   {project.slidesDeckUrl && (
                     <a
                       href={project.slidesDeckUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 hover:bg-accent rounded-md transition-colors group"
                     >
-                      <Button variant="outline" className="w-full justify-start">
-                        <FileText className="h-4 w-4 mr-2" />
-                        View Slides
-                      </Button>
+                      <div className="p-2 rounded-md bg-muted group-hover:bg-background">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Presentation</p>
+                        <p className="text-xs text-muted-foreground">View slides deck</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </a>
                   )}
+
                   {project.pitchVideoUrl && (
                     <a
                       href={project.pitchVideoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 hover:bg-accent rounded-md transition-colors group"
                     >
-                      <Button variant="outline" className="w-full justify-start">
-                        <Video className="h-4 w-4 mr-2" />
-                        Watch Pitch
-                      </Button>
+                      <div className="p-2 rounded-md bg-muted group-hover:bg-background">
+                        <Video className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Pitch Video</p>
+                        <p className="text-xs text-muted-foreground">Watch on YouTube</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </a>
+                  )}
+
+                  {!project.githubUrl && !project.slidesDeckUrl && !project.pitchVideoUrl && !project.demoUrl && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No resources available
+                    </p>
                   )}
                 </CardContent>
               </Card>
