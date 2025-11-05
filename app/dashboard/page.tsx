@@ -1,8 +1,6 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { signOut } from '@/auth'
 
 export default async function Dashboard() {
   const session = await auth()
@@ -12,46 +10,70 @@ export default async function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <form
-            action={async () => {
-              'use server'
-              await signOut({ redirectTo: '/login' })
-            }}
-          >
-            <Button type="submit" variant="outline">
-              Sign out
-            </Button>
-          </form>
+    <div className="min-h-[calc(100vh-4rem)] bg-slate-50 dark:bg-slate-900">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back, {session.user.name}!</p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+              <CardDescription>Your account details</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Full Name</p>
+                <p className="text-base">{session.user.name}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                <p className="text-base">{session.user.email}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Index Number</p>
+                <p className="text-base">{(session.user as any).indexNumber}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Registration Number</p>
+                <p className="text-base">{(session.user as any).registrationNumber}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Stats</CardTitle>
+              <CardDescription>Your activity overview</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Projects</span>
+                <span className="text-2xl font-bold">0</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Collaborations</span>
+                <span className="text-2xl font-bold">0</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Followers</span>
+                <span className="text-2xl font-bold">0</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Welcome back, {session.user.name}!</CardTitle>
-            <CardDescription>Your profile information</CardDescription>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Your latest projects and updates</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Email</p>
-                <p className="text-base">{session.user.email}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Name</p>
-                <p className="text-base">{session.user.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Index Number</p>
-                <p className="text-base">{(session.user as any).indexNumber}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Registration Number</p>
-                <p className="text-base">{(session.user as any).registrationNumber}</p>
-              </div>
-            </div>
+          <CardContent>
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              No activity yet. Start by creating your first project!
+            </p>
           </CardContent>
         </Card>
       </div>

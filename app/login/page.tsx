@@ -44,76 +44,78 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-                    <CardDescription>
-                        Enter your credentials to access your account
-                    </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="space-y-4">
-                        {registered && (
-                            <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-md">
-                                Registration successful! Please sign in with your credentials.
+        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <Card className="w-full max-w-md mx-auto">
+                    <CardHeader className="space-y-1">
+                        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+                        <CardDescription className="mb-4">
+                            Enter your credentials to access your account
+                        </CardDescription>
+                    </CardHeader>
+                    <form onSubmit={handleSubmit}>
+                        <CardContent className="space-y-4">
+                            {registered && (
+                                <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-md">
+                                    Registration successful! Please sign in with your credentials.
+                                </div>
+                            )}
+                            {error && (
+                                <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
+                                    {error}
+                                </div>
+                            )}
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email (must end with .ac.lk)</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="2022is031@ucsc.cmb.ac.lk"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                />
                             </div>
-                        )}
-                        {error && (
-                            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
-                                {error}
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password">Password</Label>
+                                    <a
+                                        href="#"
+                                        className="text-sm text-primary hover:underline"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            console.log('Forgot password clicked')
+                                        }}
+                                    >
+                                        Forgot password?
+                                    </a>
+                                </div>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                />
                             </div>
-                        )}
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email (must end with .ac.lk)</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="2022is031@ucsc.cmb.ac.lk"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-                        <div className="space-y-2 pb-2">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="password">Password</Label>
-                                <a
-                                    href="#"
-                                    className="text-sm text-primary hover:underline"
-                                    onClick={(e) => {
-                                        e.preventDefault()
-                                        console.log('Forgot password clicked')
-                                    }}
-                                >
-                                    Forgot password?
-                                </a>
-                            </div>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col space-y-4">
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? 'Signing in...' : 'Sign in'}
-                        </Button>
-                        <p className="text-sm text-center text-muted-foreground">
-                            Don&apos;t have an account?{' '}
-                            <Link href="/register" className="text-primary hover:underline font-medium">
-                                Sign up
-                            </Link>
-                        </p>
-                    </CardFooter>
-                </form>
-            </Card>
+                        </CardContent>
+                        <CardFooter className="flex flex-col space-y-4 pt-4">
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                                {isLoading ? 'Signing in...' : 'Sign in'}
+                            </Button>
+                            <p className="text-sm text-center text-muted-foreground">
+                                Don&apos;t have an account?{' '}
+                                <Link href="/register" className="text-primary hover:underline font-medium">
+                                    Sign up
+                                </Link>
+                            </p>
+                        </CardFooter>
+                    </form>
+                </Card>
+            </div>
         </div>
     )
 }

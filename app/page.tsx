@@ -6,43 +6,71 @@ export default async function Home() {
   const session = await auth()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
-      <div className="max-w-2xl mx-auto text-center space-y-8">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-          UCSC Project Share
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          A platform for university students to share and collaborate on projects.
-          {!session && ' Sign in with your university email to get started.'}
-        </p>
-        <div className="flex gap-4 justify-center">
-          {session ? (
-            <>
-              <p className="text-base">
-                Welcome back, {session.user.name}!
-              </p>
-              <Link href="/dashboard">
-                <Button size="lg">Go to Dashboard</Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button size="lg">Sign In</Button>
-              </Link>
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center space-y-8">
+        <div className="space-y-4">
+          <h1 className="text-5xl font-bold tracking-tight sm:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+            Share & Collaborate
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            A platform for Sri Lankan university students to share projects,
+            collaborate on ideas, and build together.
+          </p>
+        </div>
+
+        {session ? (
+          <div className="space-y-4">
+            <p className="text-lg">
+              Welcome back, <span className="font-semibold">{session.user.name}</span>!
+            </p>
+            <Link href="/dashboard">
+              <Button size="lg" className="text-base px-8">
+                Go to Dashboard
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex gap-4 justify-center flex-wrap">
               <Link href="/register">
-                <Button size="lg" variant="outline">
-                  Sign Up
+                <Button size="lg" className="text-base px-8">
+                  Get Started
                 </Button>
               </Link>
-            </>
-          )}
-        </div>
-        {!session && (
-          <p className="text-sm text-muted-foreground">
-            Only .ac.lk university email addresses are accepted
-          </p>
+              <Link href="/login">
+                <Button size="lg" variant="outline" className="text-base px-8">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Exclusively for students with .ac.lk university email addresses
+            </p>
+          </div>
         )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 max-w-4xl mx-auto">
+            <div className="p-6 rounded-lg border bg-card">
+              <h3 className="font-semibold mb-2">Share Projects</h3>
+              <p className="text-sm text-muted-foreground">
+                Showcase your academic projects and get feedback from peers
+              </p>
+            </div>
+            <div className="p-6 rounded-lg border bg-card">
+              <h3 className="font-semibold mb-2">Collaborate</h3>
+              <p className="text-sm text-muted-foreground">
+                Find team members and work together on innovative ideas
+              </p>
+            </div>
+            <div className="p-6 rounded-lg border bg-card">
+              <h3 className="font-semibold mb-2">Learn & Grow</h3>
+              <p className="text-sm text-muted-foreground">
+                Explore projects from students across universities
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
