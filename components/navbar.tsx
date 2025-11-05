@@ -43,16 +43,54 @@ export async function Navbar() {
               </Link>
             </nav>
           )}
+          {!session && (
+            <nav className="hidden md:flex items-center gap-6 text-sm">
+              <Link
+                href="/explore"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+              >
+                Explore
+              </Link>
+            </nav>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
           {session ? (
             <>
+              <nav className="hidden md:flex items-center gap-6 text-sm">
+                <Link
+                  href="/dashboard"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/projects"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Projects
+                </Link>
+                <Link
+                  href="/explore"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Explore
+                </Link>
+              </nav>
               <UserMenu user={session.user} />
               <MobileNav session={session} />
             </>
           ) : (
             <>
+              <nav className="hidden md:flex items-center gap-6 text-sm">
+                <Link
+                  href="/explore"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Explore
+                </Link>
+              </nav>
               <div className="hidden sm:flex items-center gap-2">
                 <Link href="/login">
                   <Button variant="ghost">Sign In</Button>

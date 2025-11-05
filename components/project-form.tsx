@@ -8,9 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { X } from 'lucide-react'
+import { X, Upload, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { TeamMemberSelector } from './team-member-selector'
 import { MarkdownEditor } from './markdown-editor'
+import {
+  uploadFile,
+  validateImageFile,
+} from '@/lib/firebase-client'
 
 const CATEGORIES = [
   'Web Development',
@@ -37,6 +41,7 @@ export function ProjectForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [uploadProgress, setUploadProgress] = useState('')
 
   // Form state
   const [title, setTitle] = useState('')
@@ -44,6 +49,9 @@ export function ProjectForm() {
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
+
+  const [thumbnail, setThumbnail] = useState<File | null>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
 
   const [slidesDeckUrl, setSlidesDeckUrl] = useState('')
   const [pitchVideoUrl, setPitchVideoUrl] = useState('')
@@ -66,12 +74,39 @@ export function ProjectForm() {
     setTags(tags.filter((tag) => tag !== tagToRemove))
   }
 
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      setError(validation.error || 'Invalid image file')
+      return
+    }
+
+    setThumbnail(file)
+    setThumbnailPreview(URL.createObjectURL(file))
+    setError('')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
 
     try {
+      let thumbnailUrl: string | undefined
+
+      // Upload thumbnail if provided
+      if (thumbnail) {
+        setUploadProgress('Uploading thumbnail...')
+        const fileName = `project_${Date.now()}.${thumbnail.name.split('.').pop()}`
+        thumbnailUrl = await uploadFile(thumbnail, 'project-thumbnails', fileName)
+      }
+
+      setUploadProgress('Creating project...')
+
       const response = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,6 +115,7 @@ export function ProjectForm() {
           description,
           category,
           tags,
+          thumbnailUrl: thumbnailUrl || undefined,
           slidesDeckUrl: slidesDeckUrl || undefined,
           pitchVideoUrl: pitchVideoUrl || undefined,
           demoUrl: demoUrl || undefined,
@@ -101,6 +137,7 @@ export function ProjectForm() {
       setError(err.message)
     } finally {
       setIsLoading(false)
+      setUploadProgress('')
     }
   }
 
@@ -109,6 +146,13 @@ export function ProjectForm() {
       {error && (
         <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
           {error}
+        </div>
+      )}
+
+      {uploadProgress && (
+        <div className="p-3 text-sm text-primary bg-primary/10 border border-primary/20 rounded-md flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {uploadProgress}
         </div>
       )}
 
@@ -134,6 +178,42 @@ export function ProjectForm() {
             required
             disabled={isLoading}
           />
+
+          <div className="space-y-2">
+            <Label>Project Thumbnail</Label>
+            <div className="flex items-start gap-4">
+              {thumbnailPreview && (
+                <div className="relative w-40 h-24 rounded-lg overflow-hidden border">
+                  <img
+                    src={thumbnailPreview}
+                    alt="Thumbnail preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1">
+                <Input
+                  id="thumbnail"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailChange}
+                  disabled={isLoading}
+                  className="hidden"
+                />
+                <label htmlFor="thumbnail">
+                  <Button type="button" variant="outline" disabled={isLoading} asChild>
+                    <span>
+                      <Upload className="h-4 w-4 mr-2" />
+                      {thumbnailPreview ? 'Change Thumbnail' : 'Upload Thumbnail'}
+                    </span>
+                  </Button>
+                </label>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Recommended: 16:9 aspect ratio, max 2MB. PNG, JPG accepted.
+                </p>
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

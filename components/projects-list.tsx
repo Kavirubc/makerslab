@@ -70,7 +70,16 @@ export function ProjectsList({ userId }: ProjectsListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {projects.map((project) => (
-        <Card key={project._id?.toString()} className="flex flex-col">
+        <Card key={project._id?.toString()} className="flex flex-col overflow-hidden">
+          {project.thumbnailUrl && (
+            <div className="relative w-full h-48 bg-muted">
+              <img
+                src={project.thumbnailUrl}
+                alt={project.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
           <CardHeader>
             <div className="flex justify-between items-start mb-2">
               <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>

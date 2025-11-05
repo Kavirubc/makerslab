@@ -111,6 +111,14 @@ export function MobileNav({ session }: MobileNavProps) {
                   Sign Up
                 </Button>
               </Link>
+              <Link
+                href="/explore"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-2 py-3 text-sm font-medium hover:bg-accent rounded-md transition-colors"
+              >
+                <Compass className="h-5 w-5" />
+                Explore
+              </Link>
             </>
           )}
         </div>
