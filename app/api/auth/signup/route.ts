@@ -72,8 +72,10 @@ export async function POST(request: NextRequest) {
       indexNumber: indexNumber.toUpperCase(),
       registrationNumber,
       universityId: university._id!,
+      role: 'user', // Default role for new users
       emailVerified: null,
       image: null,
+      isBanned: false, // Default to not banned
       createdAt: new Date(),
       updatedAt: new Date()
     }

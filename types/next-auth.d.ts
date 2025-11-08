@@ -9,6 +9,7 @@ declare module 'next-auth' {
     indexNumber: string
     registrationNumber: string
     universityId: string
+    role: 'user' | 'admin'
     image?: string | null
   }
 
@@ -20,6 +21,7 @@ declare module 'next-auth' {
       indexNumber: string
       registrationNumber: string
       universityId: string
+      role: 'user' | 'admin'
       image?: string | null
     }
   }
@@ -31,6 +33,7 @@ declare module 'next-auth/jwt' {
     indexNumber: string
     registrationNumber: string
     universityId: string
+    role: 'user' | 'admin'
     image?: string | null
   }
 }
