@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:universities": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"} scripts/seed-universities.ts"
+    "seed:universities": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"} scripts/seed-universities.ts",
+    "promote:admin": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"} scripts/promote-admin.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",

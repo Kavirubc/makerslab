@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Menu, User, LogOut, Home, FolderOpen, Compass } from 'lucide-react'
+import { Menu, User, LogOut, Home, FolderOpen, Compass, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -21,6 +21,7 @@ interface MobileNavProps {
       name?: string | null
       email?: string | null
       image?: string | null
+      role?: 'user' | 'admin'
     }
   } | null
 }
@@ -95,6 +96,16 @@ export function MobileNav({ session }: MobileNavProps) {
                 <Compass className="h-5 w-5" />
                 Explore
               </Link>
+              {session.user?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 px-2 py-3 text-sm font-medium hover:bg-accent rounded-md transition-colors"
+                >
+                  <Shield className="h-5 w-5" />
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/settings"
                 onClick={() => setOpen(false)}

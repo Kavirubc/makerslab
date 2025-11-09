@@ -40,6 +40,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
+        // Check if user is banned
+        if (user.isBanned) {
+          throw new Error('Your account has been banned. Please contact support.')
+        }
+
         // Return user data for session
         return {
           id: user._id!.toString(),
@@ -48,6 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           indexNumber: user.indexNumber,
           registrationNumber: user.registrationNumber,
           universityId: user.universityId.toString(),
+          role: user.role || 'user', // Default to 'user' if role is not set
           image: user.image || null
         }
       }
@@ -60,6 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.indexNumber = (user as any).indexNumber
         token.registrationNumber = (user as any).registrationNumber
         token.universityId = (user as any).universityId
+        token.role = (user as any).role || 'user'
         token.image = (user as any).image
       }
       return token
@@ -70,6 +77,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           ; (session.user as any).indexNumber = token.indexNumber
           ; (session.user as any).registrationNumber = token.registrationNumber
           ; (session.user as any).universityId = token.universityId
+          ; (session.user as any).role = token.role || 'user'
         session.user.image = token.image as string
       }
       return session

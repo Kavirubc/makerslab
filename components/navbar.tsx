@@ -3,10 +3,12 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { UserMenu } from './user-menu'
 import { MobileNav } from './mobile-nav'
-import Image from "next/image";
+import Image from "next/image"
+import { isAdmin } from '@/lib/utils/admin'
 
 export async function Navbar() {
   const session = await auth()
+  const userIsAdmin = isAdmin(session)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 supports-backdrop-filter:bg-background/60 backdrop-blur">
@@ -77,6 +79,14 @@ export async function Navbar() {
                 >
                   Explore
                 </Link>
+                {userIsAdmin && (
+                  <Link
+                    href="/admin"
+                    className="transition-colors hover:text-foreground/80 text-foreground/60"
+                  >
+                    Admin
+                  </Link>
+                )}
               </nav>
               <UserMenu user={session.user} />
               <MobileNav session={session} />
