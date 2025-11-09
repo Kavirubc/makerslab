@@ -17,7 +17,7 @@ export function isAdmin(session: Session | null): boolean {
  * Returns null if user is not an admin
  */
 export function getAdminUser(session: Session | null) {
-  if (!isAdmin(session)) {
+  if (!session || !isAdmin(session)) {
     return null
   }
   return session.user

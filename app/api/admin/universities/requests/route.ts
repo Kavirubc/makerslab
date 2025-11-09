@@ -132,7 +132,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body: { requestId: string; action: string; adminNotes?: string } = await request.json()
     const { requestId, action, adminNotes } = body
 
     if (!requestId || !action) {
@@ -154,15 +154,15 @@ export async function PUT(request: NextRequest) {
     }
 
     const db = await getDatabase()
-    const request = await db.collection<UniversityRequest>('universityRequests').findOne({
+    const universityRequest = await db.collection<UniversityRequest>('universityRequests').findOne({
       _id: new ObjectId(requestId)
     })
 
-    if (!request) {
+    if (!universityRequest) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 })
     }
 
-    if (request.status !== 'pending') {
+    if (universityRequest.status !== 'pending') {
       return NextResponse.json(
         { error: 'Request has already been processed' },
         { status: 400 }
@@ -185,10 +185,10 @@ export async function PUT(request: NextRequest) {
     // If approved, create the university
     if (action === 'approve') {
       const newUniversity: Omit<University, '_id'> = {
-        name: request.name,
-        district: request.district,
-        province: request.province,
-        emailDomain: request.emailDomain,
+        name: universityRequest.name,
+        district: universityRequest.district,
+        province: universityRequest.province,
+        emailDomain: universityRequest.emailDomain,
         createdAt: new Date(),
         updatedAt: new Date()
       }
