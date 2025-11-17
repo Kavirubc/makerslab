@@ -1,5 +1,6 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PortfolioLinkCard } from '@/components/portfolio-link-card'
 import { getDatabase } from '@/lib/mongodb'
@@ -44,7 +45,15 @@ export default async function Dashboard() {
     .limit(5)
     .toArray()
 
-  const portfolioUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/profile/${session.user.id}`
+  // Get base URL - prioritize NEXT_PUBLIC_BASE_URL from .env, fallback to request headers
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+  if (!baseUrl) {
+    const headersList = await headers()
+    const host = headersList.get('host') || 'localhost:3000'
+    const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https')
+    baseUrl = `${protocol}://${host}`
+  }
+  const portfolioUrl = `${baseUrl}/profile/${session.user.id}`
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-50 dark:bg-slate-900">
