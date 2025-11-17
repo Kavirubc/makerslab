@@ -131,4 +131,7 @@
   .btn {
     @apply px-12 lg:px-24 py-4 rounded-full w-fit h-fit;
   }
+  .section-wrapper {
+    @apply container mx-auto max-w-7xl;
+  }
 }
