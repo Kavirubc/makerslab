@@ -183,25 +183,19 @@ export default function AdminUniversitiesPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-background">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">University Management</h1>
             <p className="text-muted-foreground">Add, edit, and manage universities and their email domains</p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={() => {
-              setFormData({ name: '', district: '', province: '', emailDomain: '' })
-              setAddDialogOpen(true)
-            }}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add University
-            </Button>
-            <Link href="/admin">
-              <Button variant="outline">Back to Dashboard</Button>
-            </Link>
-          </div>
+          <Button onClick={() => {
+            setFormData({ name: '', district: '', province: '', emailDomain: '' })
+            setAddDialogOpen(true)
+          }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add University
+          </Button>
         </div>
 
         {/* Pending Requests */}
@@ -506,7 +500,6 @@ export default function AdminUniversitiesPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
   )
 }
 
