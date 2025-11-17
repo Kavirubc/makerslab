@@ -1,9 +1,11 @@
-import { auth } from '@/auth'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { UserMenu } from './user-menu'
-import { MobileNav } from './mobile-nav'
-import Image from "next/image"
+import { auth } from "@/auth";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { UserMenu } from "./user-menu";
+import { MobileNav } from "./mobile-nav";
+import Image from "next/image";
+import OutlineButton from "./ui/outline-button";
+import BubbleUpButton from "./ui/bubble-up-button";
 import { isAdmin } from '@/lib/utils/admin'
 
 export async function Navbar() {
@@ -11,7 +13,7 @@ export async function Navbar() {
   const userIsAdmin = isAdmin(session)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 supports-backdrop-filter:bg-background/60 backdrop-blur">
+    <header className="sticky top-0 min-h-(--header-height) z-50 w-full _border-b _bg-background/95 supports-backdrop-filter:bg-background/60 backdrop-blur py-4 bg-transparent">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center space-x-2">
@@ -93,7 +95,7 @@ export async function Navbar() {
             </>
           ) : (
             <>
-              <nav className="hidden md:flex items-center gap-6 text-sm">
+              <nav className="hidden md:flex items-center gap-6">
                 <Link
                   href="/explore"
                   className="transition-colors hover:text-foreground/80 text-foreground/60"
@@ -103,10 +105,12 @@ export async function Navbar() {
               </nav>
               <div className="hidden sm:flex items-center gap-2">
                 <Link href="/login">
-                  <Button variant="ghost">Sign In</Button>
+                  <OutlineButton className="px-4! py-2">Sign In</OutlineButton>
                 </Link>
                 <Link href="/register">
-                  <Button>Sign Up</Button>
+                  <BubbleUpButton className="py-2 lg:px-12">
+                    Sign Up
+                  </BubbleUpButton>
                 </Link>
               </div>
               <div className="flex sm:hidden">
@@ -117,5 +121,5 @@ export async function Navbar() {
         </div>
       </div>
     </header>
-  )
+  );
 }

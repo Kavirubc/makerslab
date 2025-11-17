@@ -42,17 +42,22 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* custom fonts */
+  --font-mezzano: "Mezzano", sans-serif;
+
+  --header-height: 6rem;
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.9833 0.005 98.58); /* tint into yellow*/
   --foreground: oklch(0 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0 0 0);
-  --primary: oklch(0.87 0.18 90);
+  --primary: oklch(86.72% 0.17673 90.794);
   --primary-foreground: oklch(0 0 0);
   --secondary: oklch(0.95 0 0);
   --secondary-foreground: oklch(0 0 0);
@@ -119,5 +124,14 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-12 lg:px-24 py-4 rounded-full w-fit h-fit;
+  }
+  .section-wrapper {
+    @apply container mx-auto max-w-7xl;
   }
 }

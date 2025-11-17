@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { fontSatoshi } from "@/fonts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Showcase LK",
-  description: "A platform for university students to share and collaborate on projects",
+  description:
+    "A platform for university students to share and collaborate on projects",
   icons: [{ rel: "icon", url: "/showcase/ShowcaseLogo500x500.png" }],
 };
 
@@ -29,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${fontSatoshi.className} antialiased bg-background`}
       >
         <Providers>
           <Navbar />
