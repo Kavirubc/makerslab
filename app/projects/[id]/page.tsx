@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Eye, ExternalLink, Github, FileText, Video, Calendar, Users, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { VideoEmbed } from '@/components/video-embed'
+import { ReportProjectButton } from '@/components/report-project-button'
 import ReactMarkdown from 'react-markdown'
 
 interface ProjectPageProps {
@@ -310,6 +311,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </div>
                 </div>
               )}
+
+              {/* Report Button - Bottom of sidebar */}
+              <ReportProjectButton
+                projectId={id}
+                projectTitle={project.title}
+                projectOwnerId={project.userId.toString()}
+              />
             </div>
           </div>
         </div>

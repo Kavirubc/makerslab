@@ -7,7 +7,7 @@ import { User } from '@/lib/models/User'
 import { University } from '@/lib/models/University'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Users, FolderKanban, Building2, AlertCircle } from 'lucide-react'
+import { Users, FolderKanban, Building2, AlertCircle, Flag } from 'lucide-react'
 import { isAdmin } from '@/lib/utils/admin'
 import { AdminHeader } from '@/components/admin/admin-header'
 import { StatsCard } from '@/components/admin/stats-card'
@@ -15,6 +15,7 @@ import { UserGrowthChart } from '@/components/admin/charts/user-growth-chart'
 import { ProjectTrendsChart } from '@/components/admin/charts/project-trends-chart'
 import { CategoryDistributionChart } from '@/components/admin/charts/category-distribution-chart'
 import { ActivityTimeline } from '@/components/admin/charts/activity-timeline'
+import { ProjectReport } from '@/lib/models/ProjectReport'
 
 export default async function AdminDashboard() {
   const session = await auth()
@@ -35,6 +36,10 @@ export default async function AdminDashboard() {
   const totalUniversities = await db.collection<University>('universities').countDocuments()
   const bannedUsers = await db.collection<User>('users').countDocuments({ isBanned: true })
   const adminUsers = await db.collection<User>('users').countDocuments({ role: 'admin' })
+  // Count unresolved reports (pending + reviewed, not resolved/dismissed)
+  const unresolvedReports = await db.collection<ProjectReport>('projectReports').countDocuments({
+    status: { $in: ['pending', 'reviewed'] }
+  })
 
   // Get analytics data
   const { getAnalyticsData } = await import('@/lib/utils/analytics')
@@ -73,7 +78,7 @@ export default async function AdminDashboard() {
       />
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
         <StatsCard
           title="Total Users"
           value={totalUsers}
@@ -108,6 +113,12 @@ export default async function AdminDashboard() {
           description="Currently banned"
           icon={AlertCircle}
         />
+        <StatsCard
+          title="Unresolved Reports"
+          value={unresolvedReports}
+          description="Pending review"
+          icon={Flag}
+        />
       </div>
 
       {/* Charts Grid */}
@@ -122,7 +133,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle>User Management</CardTitle>
@@ -148,6 +159,26 @@ export default async function AdminDashboard() {
               <Button className="w-full">
                 <FolderKanban className="h-4 w-4 mr-2" />
                 Manage Projects
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Reports</CardTitle>
+            <CardDescription>Review and manage project reports submitted by users</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/reports">
+              <Button className="w-full">
+                <Flag className="h-4 w-4 mr-2" />
+                Manage Reports
+                {unresolvedReports > 0 && (
+                  <span className="ml-2 bg-destructive text-destructive-foreground text-xs px-1.5 py-0.5 rounded-full">
+                    {unresolvedReports}
+                  </span>
+                )}
               </Button>
             </Link>
           </CardContent>
