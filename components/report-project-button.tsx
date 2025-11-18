@@ -29,7 +29,7 @@ export function ReportProjectButton({
     <>
       <Button
         variant="outline"
-        className="w-full"
+        className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive transition-colors"
         onClick={() => setDialogOpen(true)}
       >
         <Flag className="h-4 w-4 mr-2" />

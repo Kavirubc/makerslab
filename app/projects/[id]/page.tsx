@@ -311,6 +311,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </div>
                 </div>
               )}
+
+              {/* Report Button - Bottom of sidebar */}
+              <ReportProjectButton
+                projectId={id}
+                projectTitle={project.title}
+                projectOwnerId={project.userId.toString()}
+              />
             </div>
           </div>
         </div>
