@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { X, Search, UserPlus } from 'lucide-react'
 import { User } from '@/lib/models/User'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface TeamMember {
   name: string
@@ -30,6 +31,7 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
   const [isSearching, setIsSearching] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [role, setRole] = useState('')
+  const { success, warning } = useNotification()
 
   // Manual mode states
   const [manualName, setManualName] = useState('')
@@ -78,8 +80,11 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
         userId: selectedUser._id?.toString()
       }
       onChange([...teamMembers, newMember])
+      success(`${selectedUser.name} added to team`)
       setSelectedUser(null)
       setRole('')
+    } else {
+      warning('Please select a user and enter their role')
     }
   }
 
@@ -92,10 +97,13 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
         indexNumber: manualIndex.trim() || undefined
       }
       onChange([...teamMembers, newMember])
+      success(`${manualName.trim()} added to team`)
       setManualName('')
       setManualEmail('')
       setManualRole('')
       setManualIndex('')
+    } else {
+      warning('Please fill in all required fields')
     }
   }
 

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Share2, Check } from 'lucide-react'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface ShareButtonProps {
   projectId: string
@@ -12,6 +13,7 @@ interface ShareButtonProps {
 
 export function ShareButton({ projectId, projectTitle, iconOnly = false }: ShareButtonProps) {
   const [copied, setCopied] = useState(false)
+  const { success, error: showError } = useNotification()
 
   const getProjectUrl = () => {
     // Get base URL from environment or window location
@@ -27,6 +29,7 @@ export function ShareButton({ projectId, projectTitle, iconOnly = false }: Share
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
+      success('Link copied to clipboard!')
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
       console.error('Failed to copy to clipboard:', error)
@@ -38,9 +41,13 @@ export function ShareButton({ projectId, projectTitle, iconOnly = false }: Share
             text: `Check out this project: ${projectTitle}`,
             url: url,
           })
+          success('Shared successfully!')
         } catch (shareError) {
           console.error('Failed to share:', shareError)
+          showError('Failed to share. Please try again.')
         }
+      } else {
+        showError('Failed to copy link. Please try again.')
       }
     }
   }

@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { User, Search, Ban, UserCheck, Edit, Trash2, Eye } from 'lucide-react'
 import Link from 'next/link'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface UserData {
   _id: string
@@ -47,6 +48,7 @@ export default function AdminUsersPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
   const [banReason, setBanReason] = useState('')
+  const { success, error: showError } = useNotification()
 
   useEffect(() => {
     fetchUsers()
@@ -108,13 +110,18 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
+        success(`User ${ban ? 'banned' : 'unbanned'} successfully`)
         fetchUsers()
         setBanDialogOpen(false)
         setBanReason('')
         setSelectedUser(null)
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || `Failed to ${ban ? 'ban' : 'unban'} user`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error banning user:', error)
+      showError(error.message || `Failed to ${ban ? 'ban' : 'unban'} user`)
     }
   }
 
@@ -125,12 +132,17 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
+        success('User deleted successfully')
         fetchUsers()
         setDeleteDialogOpen(false)
         setSelectedUser(null)
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete user')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error)
+      showError(error.message || 'Failed to delete user')
     }
   }
 
@@ -143,12 +155,17 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
+        success(`User role updated to ${newRole} successfully`)
         fetchUsers()
         setEditDialogOpen(false)
         setSelectedUser(null)
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update user role')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating user:', error)
+      showError(error.message || 'Failed to update user role')
     }
   }
 

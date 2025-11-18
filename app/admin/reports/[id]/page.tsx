@@ -19,6 +19,7 @@ import { ArrowLeft, Check, X, ExternalLink, Flag, User, Calendar } from 'lucide-
 import Link from 'next/link'
 import { getReportStatusBadge, getStatusLabel, getReasonLabel } from '@/lib/utils/reports-client'
 import { REPORT_REASONS } from '@/lib/constants/reports'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface ReportDetailData {
   _id: string
@@ -68,6 +69,7 @@ export default function AdminReportDetailPage() {
   const [actionType, setActionType] = useState<'resolved' | 'dismissed' | null>(null)
   const [adminNotes, setAdminNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { success, error: showError } = useNotification()
 
   useEffect(() => {
     if (reportId) {
@@ -119,17 +121,19 @@ export default function AdminReportDetailPage() {
       })
 
       if (response.ok) {
+        success(`Report ${actionType === 'resolved' ? 'resolved' : 'dismissed'} successfully`)
         setActionDialogOpen(false)
         setActionType(null)
         setAdminNotes('')
         fetchReport()
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to update report')
+        throw new Error(data.error || 'Failed to update report')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating report:', error)
-      alert('Failed to update report')
+      const errorMessage = error.message || 'Failed to update report'
+      showError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }

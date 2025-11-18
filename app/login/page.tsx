@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 function LoginForm() {
     const [email, setEmail] = React.useState('')
@@ -17,6 +18,14 @@ function LoginForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const registered = searchParams.get('registered')
+    const { success, error: showError } = useNotification()
+
+    // Show success toast when redirected from registration
+    useEffect(() => {
+        if (registered) {
+            success('Registration successful! Please sign in with your credentials.')
+        }
+    }, [registered, success])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -31,13 +40,18 @@ function LoginForm() {
             })
 
             if (result?.error) {
-                setError('Invalid email or password')
+                const errorMessage = 'Invalid email or password'
+                setError(errorMessage)
+                showError(errorMessage)
             } else if (result?.ok) {
+                success('Welcome back! Signing you in...')
                 router.push('/dashboard')
                 router.refresh()
             }
         } catch (error) {
-            setError('An error occurred. Please try again.')
+            const errorMessage = 'An error occurred. Please try again.'
+            setError(errorMessage)
+            showError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -55,11 +69,7 @@ function LoginForm() {
                     </CardHeader>
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-4">
-                            {registered && (
-                                <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-md">
-                                    Registration successful! Please sign in with your credentials.
-                                </div>
-                            )}
+                            {/* Inline error for form validation - toast for API errors */}
                             {error && (
                                 <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
                                     {error}
