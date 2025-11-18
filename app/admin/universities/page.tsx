@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog'
 import { Building2, Plus, Edit, Trash2, Check, X, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface UniversityData {
   _id: string
@@ -61,6 +62,7 @@ export default function AdminUniversitiesPage() {
     emailDomain: ''
   })
   const [adminNotes, setAdminNotes] = useState('')
+  const { success, error: showError } = useNotification()
 
   useEffect(() => {
     fetchUniversities()
@@ -109,12 +111,17 @@ export default function AdminUniversitiesPage() {
       })
 
       if (response.ok) {
+        success('University added successfully')
         fetchUniversities()
         setAddDialogOpen(false)
         setFormData({ name: '', district: '', province: '', emailDomain: '' })
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to add university')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding university:', error)
+      showError(error.message || 'Failed to add university')
     }
   }
 
@@ -129,13 +136,18 @@ export default function AdminUniversitiesPage() {
       })
 
       if (response.ok) {
+        success('University updated successfully')
         fetchUniversities()
         setEditDialogOpen(false)
         setSelectedUniversity(null)
         setFormData({ name: '', district: '', province: '', emailDomain: '' })
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update university')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating university:', error)
+      showError(error.message || 'Failed to update university')
     }
   }
 
@@ -146,15 +158,17 @@ export default function AdminUniversitiesPage() {
       })
 
       if (response.ok) {
+        success('University deleted successfully')
         fetchUniversities()
         setDeleteDialogOpen(false)
         setSelectedUniversity(null)
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to delete university')
+        throw new Error(data.error || 'Failed to delete university')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting university:', error)
+      showError(error.message || 'Failed to delete university')
     }
   }
 
@@ -171,14 +185,19 @@ export default function AdminUniversitiesPage() {
       })
 
       if (response.ok) {
+        success(`University request ${action === 'approve' ? 'approved' : 'rejected'} successfully`)
         fetchRequests()
         fetchUniversities()
         setRequestDialogOpen(false)
         setSelectedRequest(null)
         setAdminNotes('')
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || `Failed to ${action} request`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing request:', error)
+      showError(error.message || `Failed to ${action} request`)
     }
   }
 

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 export default function ForgetPassword() {
     const [email, setEmail] = React.useState('')
@@ -14,6 +15,7 @@ export default function ForgetPassword() {
     const [success, setSuccess] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
     const router = useRouter()
+    const { success: showSuccess, error: showError } = useNotification()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -33,16 +35,22 @@ export default function ForgetPassword() {
             const data = await response.json()
 
             if (!response.ok) {
-                setError(data.error || 'An error occurred')
+                const errorMessage = data.error || 'An error occurred'
+                setError(errorMessage)
+                showError(errorMessage)
             } else {
-                setSuccess(data.message)
+                const successMessage = data.message || 'Reset instructions sent successfully'
+                setSuccess(successMessage)
+                showSuccess(successMessage)
                 // Redirect to reset password page after a short delay
                 setTimeout(() => {
                     router.push(`/reset-password?email=${encodeURIComponent(email)}`)
                 }, 2000)
             }
         } catch (error) {
-            setError('An error occurred. Please try again.')
+            const errorMessage = 'An error occurred. Please try again.'
+            setError(errorMessage)
+            showError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -60,11 +68,7 @@ export default function ForgetPassword() {
                     </CardHeader>
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-4">
-                            {success && (
-                                <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-md">
-                                    {success}
-                                </div>
-                            )}
+                            {/* Inline error for form validation - toast for API responses */}
                             {error && (
                                 <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
                                     {error}

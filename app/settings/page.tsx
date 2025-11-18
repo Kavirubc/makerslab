@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { User, Lock, Shield, ExternalLink, Edit } from 'lucide-react'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 export default function Settings() {
     const { data: session, status } = useSession()
@@ -20,6 +21,7 @@ export default function Settings() {
     const [error, setError] = React.useState('')
     const [success, setSuccess] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
+    const { success: showSuccess, error: showError } = useNotification()
 
     React.useEffect(() => {
         if (status === 'unauthenticated') {
@@ -48,17 +50,23 @@ export default function Settings() {
 
         // Validation
         if (newPassword !== confirmPassword) {
-            setError('New passwords do not match')
+            const errorMessage = 'New passwords do not match'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
         if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters long')
+            const errorMessage = 'Password must be at least 6 characters long'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
         if (!currentPassword) {
-            setError('Current password is required')
+            const errorMessage = 'Current password is required'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
@@ -76,16 +84,22 @@ export default function Settings() {
             const data = await response.json()
 
             if (!response.ok) {
-                setError(data.error || 'An error occurred')
+                const errorMessage = data.error || 'An error occurred'
+                setError(errorMessage)
+                showError(errorMessage)
             } else {
-                setSuccess(data.message)
+                const successMessage = data.message || 'Password updated successfully'
+                setSuccess(successMessage)
+                showSuccess(successMessage)
                 // Clear form
                 setCurrentPassword('')
                 setNewPassword('')
                 setConfirmPassword('')
             }
         } catch (error) {
-            setError('An error occurred. Please try again.')
+            const errorMessage = 'An error occurred. Please try again.'
+            setError(errorMessage)
+            showError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -231,11 +245,7 @@ export default function Settings() {
                                     </CardHeader>
                                     <CardContent>
                                         <form onSubmit={handlePasswordChange} className="space-y-4">
-                                            {success && (
-                                                <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-md">
-                                                    {success}
-                                                </div>
-                                            )}
+                                            {/* Inline error for form validation - toast for API responses */}
                                             {error && (
                                                 <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
                                                     {error}

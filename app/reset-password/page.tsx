@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 function ResetPasswordForm() {
     const [email, setEmail] = React.useState('')
@@ -18,6 +19,7 @@ function ResetPasswordForm() {
     const [isLoading, setIsLoading] = React.useState(false)
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { success: showSuccess, error: showError } = useNotification()
 
     React.useEffect(() => {
         const emailParam = searchParams.get('email')
@@ -33,12 +35,16 @@ function ResetPasswordForm() {
 
         // Validation
         if (newPassword !== confirmPassword) {
-            setError('Passwords do not match')
+            const errorMessage = 'Passwords do not match'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
         if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters long')
+            const errorMessage = 'Password must be at least 6 characters long'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
@@ -56,16 +62,22 @@ function ResetPasswordForm() {
             const data = await response.json()
 
             if (!response.ok) {
-                setError(data.error || 'An error occurred')
+                const errorMessage = data.error || 'An error occurred'
+                setError(errorMessage)
+                showError(errorMessage)
             } else {
-                setSuccess(data.message)
+                const successMessage = data.message || 'Password reset successfully'
+                setSuccess(successMessage)
+                showSuccess(successMessage)
                 // Redirect to login page after a short delay
                 setTimeout(() => {
                     router.push('/login')
                 }, 2000)
             }
         } catch (error) {
-            setError('An error occurred. Please try again.')
+            const errorMessage = 'An error occurred. Please try again.'
+            setError(errorMessage)
+            showError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -83,11 +95,7 @@ function ResetPasswordForm() {
                     </CardHeader>
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-4">
-                            {success && (
-                                <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-md">
-                                    {success}
-                                </div>
-                            )}
+                            {/* Inline error for form validation - toast for API responses */}
                             {error && (
                                 <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
                                     {error}

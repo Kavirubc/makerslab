@@ -135,3 +135,71 @@
     @apply container mx-auto max-w-7xl;
   }
 }
+
+/* Sonner Toast Custom Styling - Glassy effects with proper colors */
+/* Success: Glassy Green */
+[data-sonner-toast][data-type="success"],
+[data-sonner-toast][data-type="success"] > div {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(74, 222, 128, 0.3) !important;
+  border-width: 1px !important;
+  color: rgb(20, 83, 45) !important;
+}
+
+[data-sonner-toast][data-type="success"][data-theme="dark"],
+.dark [data-sonner-toast][data-type="success"],
+.dark [data-sonner-toast][data-type="success"] > div {
+  color: rgb(220, 252, 231) !important;
+}
+
+/* Error: Glassy Red */
+[data-sonner-toast][data-type="error"],
+[data-sonner-toast][data-type="error"] > div {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+  border-width: 1px !important;
+  color: rgb(153, 27, 27) !important;
+}
+
+[data-sonner-toast][data-type="error"][data-theme="dark"],
+.dark [data-sonner-toast][data-type="error"],
+.dark [data-sonner-toast][data-type="error"] > div {
+  color: rgb(254, 226, 226) !important;
+}
+
+/* Warning: Glassy Yellow (adaptive from color scheme) */
+[data-sonner-toast][data-type="warning"],
+[data-sonner-toast][data-type="warning"] > div {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(250, 204, 21, 0.3) !important;
+  border-width: 1px !important;
+  color: rgb(113, 63, 18) !important;
+}
+
+[data-sonner-toast][data-type="warning"][data-theme="dark"],
+.dark [data-sonner-toast][data-type="warning"],
+.dark [data-sonner-toast][data-type="warning"] > div {
+  color: rgb(254, 249, 195) !important;
+}
+
+/* Info: Glassy Yellow (using primary yellow from schema) */
+[data-sonner-toast][data-type="info"],
+[data-sonner-toast][data-type="info"] > div {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(250, 204, 21, 0.3) !important;
+  border-width: 1px !important;
+  color: var(--primary-foreground) !important;
+}
+
+.dark [data-sonner-toast][data-type="info"],
+.dark [data-sonner-toast][data-type="info"] > div {
+  color: var(--primary-foreground) !important;
+}

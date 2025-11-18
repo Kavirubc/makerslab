@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 export default function Register() {
     const [formData, setFormData] = React.useState({
@@ -20,6 +21,7 @@ export default function Register() {
     const [error, setError] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
     const router = useRouter()
+    const { success, error: showError } = useNotification()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -38,22 +40,30 @@ export default function Register() {
 
         // Validation
         if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.indexNumber || !formData.registrationNumber) {
-            setError('All fields are required')
+            const errorMessage = 'All fields are required'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
         if (!validateEmail(formData.email)) {
-            setError('Email must end with .ac.lk (e.g., 2022is031@ucsc.cmb.ac.lk)')
+            const errorMessage = 'Email must end with .ac.lk (e.g., 2022is031@ucsc.cmb.ac.lk)'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
         if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters long')
+            const errorMessage = 'Password must be at least 8 characters long'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match')
+            const errorMessage = 'Passwords do not match'
+            setError(errorMessage)
+            showError(errorMessage)
             return
         }
 
@@ -77,14 +87,19 @@ export default function Register() {
             const data = await response.json()
 
             if (!response.ok) {
-                setError(data.error || 'An error occurred during registration')
+                const errorMessage = data.error || 'An error occurred during registration'
+                setError(errorMessage)
+                showError(errorMessage)
                 return
             }
 
             // Registration successful, redirect to login
+            success('Account created successfully! Redirecting to login...')
             router.push('/login?registered=true')
         } catch (error) {
-            setError('An error occurred. Please try again.')
+            const errorMessage = 'An error occurred. Please try again.'
+            setError(errorMessage)
+            showError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -102,6 +117,7 @@ export default function Register() {
                     </CardHeader>
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-4">
+                            {/* Inline error for form validation - toast for API errors */}
                             {error && (
                                 <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
                                     {error}

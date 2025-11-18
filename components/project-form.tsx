@@ -15,6 +15,7 @@ import {
   uploadFile,
   validateImageFile,
 } from '@/lib/firebase-client'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 const CATEGORIES = [
   'Web Development',
@@ -42,6 +43,7 @@ export function ProjectForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [uploadProgress, setUploadProgress] = useState('')
+  const { success, error: showError } = useNotification()
 
   // Form state
   const [title, setTitle] = useState('')
@@ -81,7 +83,9 @@ export function ProjectForm() {
     // Validate file
     const validation = validateImageFile(file)
     if (!validation.valid) {
-      setError(validation.error || 'Invalid image file')
+      const errorMessage = validation.error || 'Invalid image file'
+      setError(errorMessage)
+      showError(errorMessage)
       return
     }
 
@@ -131,10 +135,13 @@ export function ProjectForm() {
         throw new Error(data.error || 'Failed to create project')
       }
 
+      success('Project created successfully!')
       router.push('/projects')
       router.refresh()
     } catch (err: any) {
-      setError(err.message)
+      const errorMessage = err.message || 'Failed to create project'
+      setError(errorMessage)
+      showError(errorMessage)
     } finally {
       setIsLoading(false)
       setUploadProgress('')
@@ -143,6 +150,7 @@ export function ProjectForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+      {/* Inline error for form validation - toast for API errors */}
       {error && (
         <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
           {error}

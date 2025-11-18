@@ -15,6 +15,7 @@ import {
   validateImageAspectRatio,
   validateCVFile
 } from '@/lib/firebase-client'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface ProfileEditFormProps {
   user: {
@@ -35,6 +36,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [uploadProgress, setUploadProgress] = useState('')
+  const { success, error: showError } = useNotification()
 
   // Form state
   const [bio, setBio] = useState(user.bio || '')
@@ -58,14 +60,18 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
     // Validate file type and size
     const validation = validateImageFile(file)
     if (!validation.valid) {
-      setError(validation.error || 'Invalid image file')
+      const errorMessage = validation.error || 'Invalid image file'
+      setError(errorMessage)
+      showError(errorMessage)
       return
     }
 
     // Validate aspect ratio
     const aspectValidation = await validateImageAspectRatio(file)
     if (!aspectValidation.valid) {
-      setError(aspectValidation.error || 'Invalid image dimensions')
+      const errorMessage = aspectValidation.error || 'Invalid image dimensions'
+      setError(errorMessage)
+      showError(errorMessage)
       return
     }
 
@@ -80,7 +86,9 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
 
     const validation = validateCVFile(file)
     if (!validation.valid) {
-      setError(validation.error || 'Invalid CV file')
+      const errorMessage = validation.error || 'Invalid CV file'
+      setError(errorMessage)
+      showError(errorMessage)
       return
     }
 
@@ -133,10 +141,13 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
         throw new Error(data.error || 'Failed to update profile')
       }
 
+      success('Profile updated successfully!')
       router.push(`/profile/${user._id}`)
       router.refresh()
     } catch (err: any) {
-      setError(err.message)
+      const errorMessage = err.message || 'Failed to update profile'
+      setError(errorMessage)
+      showError(errorMessage)
     } finally {
       setIsLoading(false)
       setUploadProgress('')
@@ -145,6 +156,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+      {/* Inline error for form validation - toast for API errors */}
       {error && (
         <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
           {error}

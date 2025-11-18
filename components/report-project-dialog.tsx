@@ -23,6 +23,7 @@ import {
 import { uploadFile, validateImageFile } from '@/lib/firebase-client'
 import { REPORT_REASONS, MAX_EVIDENCE_IMAGES, MAX_EVIDENCE_IMAGE_SIZE } from '@/lib/constants/reports'
 import { X, Upload, AlertCircle } from 'lucide-react'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface ReportProjectDialogProps {
   open: boolean
@@ -41,6 +42,7 @@ export function ReportProjectDialog({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [uploadProgress, setUploadProgress] = useState('')
+  const { success, error: showError } = useNotification()
 
   // Form state
   const [reason, setReason] = useState('')
@@ -98,13 +100,17 @@ export function ReportProjectDialog({
 
     // Validate form
     if (!reason) {
-      setError('Please select a reason for reporting')
+      const errorMessage = 'Please select a reason for reporting'
+      setError(errorMessage)
+      showError(errorMessage)
       setIsLoading(false)
       return
     }
 
     if (!description.trim()) {
-      setError('Please provide a description')
+      const errorMessage = 'Please provide a description'
+      setError(errorMessage)
+      showError(errorMessage)
       setIsLoading(false)
       return
     }
@@ -142,6 +148,7 @@ export function ReportProjectDialog({
       }
 
       // Success - close dialog and refresh
+      success('Report submitted successfully. Thank you for your feedback!')
       onOpenChange(false)
       router.refresh()
       
@@ -152,7 +159,9 @@ export function ReportProjectDialog({
       evidencePreviews.forEach(url => URL.revokeObjectURL(url))
       setEvidencePreviews([])
     } catch (err: any) {
-      setError(err.message || 'Failed to submit report')
+      const errorMessage = err.message || 'Failed to submit report'
+      setError(errorMessage)
+      showError(errorMessage)
     } finally {
       setIsLoading(false)
       setUploadProgress('')

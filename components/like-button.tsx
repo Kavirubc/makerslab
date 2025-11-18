@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Heart } from 'lucide-react'
+import { useNotification } from '@/lib/hooks/use-notification'
 
 interface LikeButtonProps {
   projectId: string
@@ -24,6 +25,7 @@ export function LikeButton({
   const [isLiked, setIsLiked] = useState(initialIsLiked)
   const [likesCount, setLikesCount] = useState(initialLikesCount)
   const [isLoading, setIsLoading] = useState(false)
+  const { success, error: showError } = useNotification()
 
   // Fetch initial like status if not provided (fallback for client-side navigation)
   useEffect(() => {
@@ -80,12 +82,15 @@ export function LikeButton({
       const data = await response.json()
       setIsLiked(data.liked)
       setLikesCount(data.likesCount)
+      // Show success toast
+      success(data.liked ? 'Project liked!' : 'Like removed')
       router.refresh()
     } catch (error) {
       console.error('Error toggling like:', error)
       // Revert on error
       setIsLiked(previousLiked)
       setLikesCount(previousCount)
+      showError('Failed to update like. Please try again.')
     } finally {
       setIsLoading(false)
     }
