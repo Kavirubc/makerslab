@@ -65,7 +65,7 @@ export function MobileNav({ session }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent
         side="top"
-        className="w-[calc(100vw-2rem)] sm:w-[400px] max-h-[80vh]! mx-auto top-(--header-height) p-4 rounded-2xl"
+        className="w-[calc(100vw-2rem)] sm:w-[400px] max-h-[85vh]! mx-auto top-6 p-4 rounded-2xl overflow-y-scroll"
       >
         <SheetHeader>
           <SheetTitle>Menu</SheetTitle>
