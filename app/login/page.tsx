@@ -9,10 +9,12 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useNotification } from '@/lib/hooks/use-notification'
+import { Eye, EyeOff } from 'lucide-react'
 
 function LoginForm() {
     const [email, setEmail] = React.useState('')
     const [password, setPassword] = React.useState('')
+    const [showPassword, setShowPassword] = React.useState(false)
     const [error, setError] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
     const router = useRouter()
@@ -99,16 +101,30 @@ function LoginForm() {
                                             Forgot password?
                                         </Link>
                                     </div>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        placeholder="Enter your password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        disabled={isLoading}
-                                        className="h-11"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Enter your password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            disabled={isLoading}
+                                            className="h-11 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            disabled={isLoading}
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </CardContent>
                             <CardFooter className="flex flex-col space-y-4 pt-6">

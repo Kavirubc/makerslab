@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useNotification } from '@/lib/hooks/use-notification'
 import { UniversityRequestForm } from '@/components/university-request-form'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function Register() {
     const [formData, setFormData] = React.useState({
@@ -28,6 +29,8 @@ export default function Register() {
     })
     const [error, setError] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
+    const [showPassword, setShowPassword] = React.useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
     const [showUniversityRequestDialog, setShowUniversityRequestDialog] = React.useState(false)
     const router = useRouter()
     const { success, error: showError, info } = useNotification()
@@ -214,31 +217,59 @@ export default function Register() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                                    <Input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        placeholder="At least 8 characters"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                        disabled={isLoading}
-                                        className="h-11"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            name="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="At least 8 characters"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            required
+                                            disabled={isLoading}
+                                            className="h-11 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            disabled={isLoading}
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
-                                    <Input
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        type="password"
-                                        placeholder="Re-enter your password"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        required
-                                        disabled={isLoading}
-                                        className="h-11"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            placeholder="Re-enter your password"
+                                            value={formData.confirmPassword}
+                                            onChange={handleChange}
+                                            required
+                                            disabled={isLoading}
+                                            className="h-11 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            disabled={isLoading}
+                                        >
+                                            {showConfirmPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </CardContent>
                             <CardFooter className="flex flex-col space-y-4 pt-6">

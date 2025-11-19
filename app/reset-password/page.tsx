@@ -8,12 +8,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useNotification } from '@/lib/hooks/use-notification'
+import { Eye, EyeOff } from 'lucide-react'
 
 function ResetPasswordForm() {
     const [email, setEmail] = React.useState('')
     const [indexNumber, setIndexNumber] = React.useState('')
     const [newPassword, setNewPassword] = React.useState('')
     const [confirmPassword, setConfirmPassword] = React.useState('')
+    const [showNewPassword, setShowNewPassword] = React.useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
     const [error, setError] = React.useState('')
     const [success, setSuccess] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
@@ -135,31 +138,59 @@ function ResetPasswordForm() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="newPassword" className="text-sm font-medium">New Password</Label>
-                                    <Input
-                                        id="newPassword"
-                                        type="password"
-                                        placeholder="Enter new password"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        required
-                                        disabled={isLoading}
-                                        minLength={6}
-                                        className="h-11"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="newPassword"
+                                            type={showNewPassword ? "text" : "password"}
+                                            placeholder="Enter new password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                            disabled={isLoading}
+                                            minLength={6}
+                                            className="h-11 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            disabled={isLoading}
+                                        >
+                                            {showNewPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm New Password</Label>
-                                    <Input
-                                        id="confirmPassword"
-                                        type="password"
-                                        placeholder="Confirm new password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                        disabled={isLoading}
-                                        minLength={6}
-                                        className="h-11"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="confirmPassword"
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            placeholder="Confirm new password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                            disabled={isLoading}
+                                            minLength={6}
+                                            className="h-11 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            disabled={isLoading}
+                                        >
+                                            {showConfirmPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </CardContent>
                             <CardFooter className="flex flex-col space-y-4 pt-6">
