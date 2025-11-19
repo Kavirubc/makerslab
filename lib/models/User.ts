@@ -20,6 +20,8 @@ export interface User {
   isBanned: boolean // Whether user is banned, default: false
   bannedAt?: Date | null // When user was banned
   bannedReason?: string | null // Reason for ban
+  contributorType?: 'contributor' | 'core-contributor' | null // Contributor status
+  contributedAt?: Date | null // When user became a contributor
   createdAt: Date
   updatedAt: Date
 }
@@ -43,6 +45,8 @@ export interface UserWithoutPassword extends Omit<User, 'password'> {
   isBanned: boolean
   bannedAt?: Date | null
   bannedReason?: string | null
+  contributorType?: 'contributor' | 'core-contributor' | null
+  contributedAt?: Date | null
   createdAt: Date
   updatedAt: Date
 }

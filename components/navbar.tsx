@@ -81,6 +81,12 @@ export async function Navbar() {
                 >
                   Explore
                 </Link>
+                <Link
+                  href="/contributors"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Contributors
+                </Link>
                 {userIsAdmin && (
                   <Link
                     href="/admin"
@@ -101,6 +107,12 @@ export async function Navbar() {
                   className="transition-colors hover:text-foreground/80 text-foreground/60"
                 >
                   Explore
+                </Link>
+                <Link
+                  href="/contributors"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Contributors
                 </Link>
               </nav>
               <div className="hidden sm:flex items-center gap-2">

@@ -17,9 +17,10 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { User, Search, Ban, UserCheck, Edit, Trash2, Eye } from 'lucide-react'
+import { User, Search, Ban, UserCheck, Edit, Trash2, Eye, Award } from 'lucide-react'
 import Link from 'next/link'
 import { useNotification } from '@/lib/hooks/use-notification'
+import { ContributorBadge } from '@/components/contributor-badge'
 
 interface UserData {
   _id: string
@@ -31,6 +32,7 @@ interface UserData {
   isBanned: boolean
   bannedAt?: Date | null
   bannedReason?: string | null
+  contributorType?: 'contributor' | 'core-contributor' | null
   createdAt: Date
 }
 
@@ -46,6 +48,7 @@ export default function AdminUsersPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [banDialogOpen, setBanDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [contributorDialogOpen, setContributorDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
   const [banReason, setBanReason] = useState('')
   const { success, error: showError } = useNotification()
@@ -169,6 +172,34 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleUpdateContributor = async (user: UserData, contributorType: 'contributor' | 'core-contributor' | null) => {
+    try {
+      const response = await fetch(`/api/admin/users/${user._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contributorType }),
+      })
+
+      if (response.ok) {
+        const message = contributorType === null 
+          ? 'Contributor status removed successfully'
+          : contributorType === 'core-contributor'
+          ? 'User added as core contributor successfully'
+          : 'User added as contributor successfully'
+        success(message)
+        fetchUsers()
+        setContributorDialogOpen(false)
+        setSelectedUser(null)
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update contributor status')
+      }
+    } catch (error: any) {
+      console.error('Error updating contributor:', error)
+      showError(error.message || 'Failed to update contributor status')
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -258,6 +289,7 @@ export default function AdminUsersPage() {
                       <th className="text-left p-2">Index Number</th>
                       <th className="text-left p-2">Role</th>
                       <th className="text-left p-2">Status</th>
+                      <th className="text-left p-2">Contributor</th>
                       <th className="text-left p-2">Created</th>
                       <th className="text-right p-2">Actions</th>
                     </tr>
@@ -280,6 +312,16 @@ export default function AdminUsersPage() {
                             <Badge variant="outline">Active</Badge>
                           )}
                         </td>
+                        <td className="p-2">
+                          {user.contributorType ? (
+                            <ContributorBadge
+                              contributorType={user.contributorType}
+                              className="text-[10px] px-2 py-0.5"
+                            />
+                          ) : (
+                            <Badge variant="outline">-</Badge>
+                          )}
+                        </td>
                         <td className="p-2 text-sm text-muted-foreground">
                           {new Date(user.createdAt).toLocaleDateString()}
                         </td>
@@ -290,6 +332,17 @@ export default function AdminUsersPage() {
                                 <Eye className="h-4 w-4" />
                               </Button>
                             </Link>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(user)
+                                setContributorDialogOpen(true)
+                              }}
+                              title="Manage Contributor Status"
+                            >
+                              <Award className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -460,6 +513,53 @@ export default function AdminUsersPage() {
               }}
             >
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contributor Management Dialog */}
+      <Dialog open={contributorDialogOpen} onOpenChange={setContributorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Contributor Status</DialogTitle>
+            <DialogDescription>
+              Update contributor status for {selectedUser?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Contributor Type</Label>
+              <Select
+                value={selectedUser?.contributorType || 'none'}
+                onValueChange={(value) => {
+                  if (selectedUser) {
+                    const contributorType = value === 'none' ? null : value as 'contributor' | 'core-contributor'
+                    handleUpdateContributor(selectedUser, contributorType)
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Not a Contributor</SelectItem>
+                  <SelectItem value="contributor">Contributor</SelectItem>
+                  <SelectItem value="core-contributor">Core Contributor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedUser?.contributorType && (
+              <div className="text-sm text-muted-foreground">
+                Current status: <Badge variant={selectedUser.contributorType === 'core-contributor' ? 'default' : 'secondary'}>
+                  {selectedUser.contributorType === 'core-contributor' ? 'Core Contributor' : 'Contributor'}
+                </Badge>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setContributorDialogOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

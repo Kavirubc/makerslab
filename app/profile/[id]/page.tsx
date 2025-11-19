@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ContributorBadge } from '@/components/contributor-badge'
 import { Mail, MapPin, School, Eye, Linkedin, Github, FileText, Edit, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { auth } from '@/auth'
@@ -76,7 +77,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
                 <div className="flex-grow space-y-4">
                   <div>
-                    <h1 className="text-3xl font-bold mb-2">{user.name}</h1>
+                    <div className="flex items-baseline gap-3 mb-2">
+                      <h1 className="text-3xl font-bold">{user.name}</h1>
+                      {/* Contributor badge with glassy styling - aligned with name baseline */}
+                      {user.contributorType && (
+                        <ContributorBadge contributorType={user.contributorType} />
+                      )}
+                    </div>
                     {user.bio && (
                       <p className="text-muted-foreground mb-4">{user.bio}</p>
                     )}

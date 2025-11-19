@@ -59,7 +59,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { name, email, indexNumber, registrationNumber, role, bio, linkedin, github } = body
+    const { name, email, indexNumber, registrationNumber, role, bio, linkedin, github, contributorType } = body
 
     const db = await getDatabase()
     const user = await db.collection<User>('users').findOne({
@@ -85,6 +85,16 @@ export async function PUT(
     if (bio !== undefined) updateData.bio = bio
     if (linkedin !== undefined) updateData.linkedin = linkedin
     if (github !== undefined) updateData.github = github
+    // Handle contributorType: set contributedAt when adding, clear when removing
+    if (contributorType !== undefined) {
+      if (contributorType === 'contributor' || contributorType === 'core-contributor') {
+        updateData.contributorType = contributorType
+        updateData.contributedAt = new Date()
+      } else if (contributorType === null) {
+        updateData.contributorType = null
+        updateData.contributedAt = null
+      }
+    }
 
     await db.collection<User>('users').updateOne(
       { _id: new ObjectId(id) },
