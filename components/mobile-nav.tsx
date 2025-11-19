@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Menu, User, LogOut, Home, FolderOpen, Compass, Shield } from 'lucide-react'
+import { Menu, User, LogOut, Home, FolderOpen, Compass, Shield, Award } from 'lucide-react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -96,6 +96,14 @@ export function MobileNav({ session }: MobileNavProps) {
                 <Compass className="h-5 w-5" />
                 Explore
               </Link>
+              <Link
+                href="/contributors"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-2 py-3 text-sm font-medium hover:bg-accent rounded-md transition-colors"
+              >
+                <Award className="h-5 w-5" />
+                Contributors
+              </Link>
               {session.user?.role === 'admin' && (
                 <Link
                   href="/admin"
@@ -147,6 +155,14 @@ export function MobileNav({ session }: MobileNavProps) {
               >
                 <Compass className="h-5 w-5" />
                 Explore
+              </Link>
+              <Link
+                href="/contributors"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-2 py-3 text-sm font-medium hover:bg-accent rounded-md transition-colors"
+              >
+                <Award className="h-5 w-5" />
+                Contributors
               </Link>
             </>
           )}

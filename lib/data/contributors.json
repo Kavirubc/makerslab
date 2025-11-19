@@ -1,0 +1,24 @@
+{
+  "contributors": [
+    {
+      "name": "Kaviru Bandara Chandrasiri",
+      "email": "kavirubandara@gmail.com",
+      "contributorType": "core",
+      "contributions": [
+        "Project architecture and setup",
+        "Authentication system",
+        "Database integration"
+      ],
+      "github": "Kavirubc"
+    },
+    {
+      "name": "Dinil Thilakarathne",
+      "contributorType": "core",
+      "contributions": [
+        "UI/UX design",
+        "Frontend components",
+        "Feature development"
+      ]
+    }
+  ]
+}
