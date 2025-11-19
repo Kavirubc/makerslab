@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, district, province, emailDomain, reason } = body
+    const { name, facultyName, district, province, emailDomain, reason } = body
 
     // Validation
     if (!name || !district || !province || !emailDomain) {
@@ -91,12 +91,13 @@ export async function POST(request: NextRequest) {
 
     const newRequest: Omit<UniversityRequest, '_id'> = {
       userId: new ObjectId(session.user.id),
-      name,
-      district,
-      province,
-      emailDomain: emailDomain.toLowerCase(),
+      name: name.trim(),
+      facultyName: facultyName?.trim() || null,
+      district: district.trim(),
+      province: province.trim(),
+      emailDomain: emailDomain.toLowerCase().trim(),
       status: 'pending',
-      reason: reason || null,
+      reason: reason?.trim() || null,
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -184,8 +185,13 @@ export async function PUT(request: NextRequest) {
 
     // If approved, create the university
     if (action === 'approve') {
+      // Include faculty name in university name if provided
+      const universityName = universityRequest.facultyName
+        ? `${universityRequest.name} - ${universityRequest.facultyName}`
+        : universityRequest.name
+
       const newUniversity: Omit<University, '_id'> = {
-        name: universityRequest.name,
+        name: universityName,
         district: universityRequest.district,
         province: universityRequest.province,
         emailDomain: universityRequest.emailDomain,

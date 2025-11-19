@@ -5,9 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useNotification } from '@/lib/hooks/use-notification'
+import { UniversityRequestForm } from '@/components/university-request-form'
 
 export default function Register() {
     const [formData, setFormData] = React.useState({
@@ -20,8 +28,9 @@ export default function Register() {
     })
     const [error, setError] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
+    const [showUniversityRequestDialog, setShowUniversityRequestDialog] = React.useState(false)
     const router = useRouter()
-    const { success, error: showError } = useNotification()
+    const { success, error: showError, info } = useNotification()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -88,8 +97,16 @@ export default function Register() {
 
             if (!response.ok) {
                 const errorMessage = data.error || 'An error occurred during registration'
-                setError(errorMessage)
-                showError(errorMessage)
+
+                // Check if error is due to university not found
+                if (errorMessage.includes('University not found') || errorMessage.includes('university not found')) {
+                    // Show university request dialog
+                    setShowUniversityRequestDialog(true)
+                    info('Your university is not yet supported. Please request to add it below.')
+                } else {
+                    setError(errorMessage)
+                    showError(errorMessage)
+                }
                 return
             }
 
@@ -148,9 +165,19 @@ export default function Register() {
                                     required
                                     disabled={isLoading}
                                 />
-                                <p className="text-xs text-muted-foreground">
-                                    Must end with .ac.lk
-                                </p>
+                                <div className="flex items-center justify-between">
+                                    <p className="text-xs text-muted-foreground">
+                                        Must end with .ac.lk
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowUniversityRequestDialog(true)}
+                                        className="text-xs text-primary hover:underline font-medium"
+                                        disabled={isLoading}
+                                    >
+                                        Request new university
+                                    </button>
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -221,6 +248,28 @@ export default function Register() {
                     </form>
                 </Card>
             </div>
+
+            {/* University Request Dialog */}
+            <Dialog open={showUniversityRequestDialog} onOpenChange={setShowUniversityRequestDialog}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>University Not Found</DialogTitle>
+                        <DialogDescription>
+                            Your email domain is not currently supported. Request to add your university below.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <UniversityRequestForm
+                        userEmail={formData.email && formData.email.toLowerCase().endsWith('.ac.lk') ? formData.email : undefined}
+                        onSuccess={() => {
+                            setShowUniversityRequestDialog(false)
+                            info('Your request has been submitted. Please wait for admin approval before signing up.')
+                        }}
+                        onCancel={() => {
+                            setShowUniversityRequestDialog(false)
+                        }}
+                    />
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
