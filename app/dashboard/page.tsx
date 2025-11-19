@@ -1,120 +1,169 @@
-import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PortfolioLinkCard } from '@/components/portfolio-link-card'
-import { getDatabase } from '@/lib/mongodb'
-import { Project } from '@/lib/models/Project'
-import { ProjectLike } from '@/lib/models/ProjectLike'
-import { ObjectId } from 'mongodb'
-import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Eye, Edit, FolderKanban, Users, TrendingUp, Heart } from 'lucide-react'
-import { StatsCard } from '@/components/admin/stats-card'
-import { ProjectViewsChart } from '@/components/user/charts/project-views-chart'
-import { ProjectCreationChart } from '@/components/user/charts/project-creation-chart'
-import { UserCategoryChart } from '@/components/user/charts/user-category-chart'
-import { UserEngagementChart } from '@/components/user/charts/user-engagement-chart'
-import { getUserAnalyticsData } from '@/lib/utils/user-analytics'
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { PortfolioLinkCard } from "@/components/portfolio-link-card";
+import { getDatabase } from "@/lib/mongodb";
+import { Project } from "@/lib/models/Project";
+import { ProjectLike } from "@/lib/models/ProjectLike";
+import { ObjectId } from "mongodb";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Eye,
+  Edit,
+  FolderKanban,
+  Users,
+  TrendingUp,
+  Heart,
+  ExternalLink,
+} from "lucide-react";
+import { StatsCard } from "@/components/admin/stats-card";
+import { ProjectViewsChart } from "@/components/user/charts/project-views-chart";
+import { ProjectCreationChart } from "@/components/user/charts/project-creation-chart";
+import { UserCategoryChart } from "@/components/user/charts/user-category-chart";
+import { UserEngagementChart } from "@/components/user/charts/user-engagement-chart";
+import { getUserAnalyticsData } from "@/lib/utils/user-analytics";
 
 export default async function Dashboard() {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user) {
-    redirect('/login')
+    redirect("/login");
   }
 
-  const db = await getDatabase()
-  const userId = new ObjectId(session.user.id)
+  const db = await getDatabase();
+  const userId = new ObjectId(session.user.id);
 
   // Get stats
-  const projectsCount = await db.collection<Project>('projects').countDocuments({
-    userId: userId
-  })
+  const projectsCount = await db
+    .collection<Project>("projects")
+    .countDocuments({
+      userId: userId,
+    });
 
-  const collaborationsCount = await db.collection<Project>('projects').countDocuments({
-    'teamMembers.userId': session.user.id,
-    userId: { $ne: userId }
-  })
+  const collaborationsCount = await db
+    .collection<Project>("projects")
+    .countDocuments({
+      "teamMembers.userId": session.user.id,
+      userId: { $ne: userId },
+    });
 
   // Calculate total views and likes across all user's projects
-  const totalViewsResult = await db.collection<Project>('projects').aggregate([
-    { $match: { userId: userId } },
-    { $group: { _id: null, totalViews: { $sum: '$views' }, totalLikes: { $sum: '$likes' } } }
-  ]).toArray()
-  const totalViews = totalViewsResult[0]?.totalViews || 0
-  const totalLikes = totalViewsResult[0]?.totalLikes || 0
+  const totalViewsResult = await db
+    .collection<Project>("projects")
+    .aggregate([
+      { $match: { userId: userId } },
+      {
+        $group: {
+          _id: null,
+          totalViews: { $sum: "$views" },
+          totalLikes: { $sum: "$likes" },
+        },
+      },
+    ])
+    .toArray();
+  const totalViews = totalViewsResult[0]?.totalViews || 0;
+  const totalLikes = totalViewsResult[0]?.totalLikes || 0;
 
   // Get analytics data
-  const analytics = await getUserAnalyticsData(session.user.id, 30)
+  const analytics = await getUserAnalyticsData(session.user.id, 30);
 
   // Calculate trends for stats cards
-  const now = new Date()
-  const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-  const previous7Days = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
+  const now = new Date();
+  const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const previous7Days = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-  const projectsLast7Days = await db.collection<Project>('projects').countDocuments({
-    userId: userId,
-    createdAt: { $gte: last7Days }
-  })
-  const projectsPrevious7Days = await db.collection<Project>('projects').countDocuments({
-    userId: userId,
-    createdAt: { $gte: previous7Days, $lt: last7Days }
-  })
-  const projectGrowthRate = projectsPrevious7Days > 0
-    ? ((projectsLast7Days - projectsPrevious7Days) / projectsPrevious7Days) * 100
-    : 0
+  const projectsLast7Days = await db
+    .collection<Project>("projects")
+    .countDocuments({
+      userId: userId,
+      createdAt: { $gte: last7Days },
+    });
+  const projectsPrevious7Days = await db
+    .collection<Project>("projects")
+    .countDocuments({
+      userId: userId,
+      createdAt: { $gte: previous7Days, $lt: last7Days },
+    });
+  const projectGrowthRate =
+    projectsPrevious7Days > 0
+      ? ((projectsLast7Days - projectsPrevious7Days) / projectsPrevious7Days) *
+        100
+      : 0;
 
   // Get recent projects
-  const recentProjects = await db.collection<Project>('projects')
+  const recentProjects = await db
+    .collection<Project>("projects")
     .find({ userId: userId })
     .sort({ createdAt: -1 })
     .limit(6)
-    .toArray()
+    .toArray();
 
   // Get liked projects
-  const likedProjectIds = await db.collection<ProjectLike>('projectLikes')
+  const likedProjectIds = await db
+    .collection<ProjectLike>("projectLikes")
     .find({ userId: userId })
     .sort({ createdAt: -1 })
     .limit(6)
-    .toArray()
+    .toArray();
 
   // Fetch projects and maintain order
-  const likedProjects = likedProjectIds.length > 0
-    ? (await db.collection<Project>('projects')
-        .find({
-          _id: { $in: likedProjectIds.map(like => like.projectId) }
-        })
-        .toArray())
-        .sort((a, b) => {
+  const likedProjects =
+    likedProjectIds.length > 0
+      ? (
+          await db
+            .collection<Project>("projects")
+            .find({
+              _id: { $in: likedProjectIds.map((like) => like.projectId) },
+            })
+            .toArray()
+        ).sort((a, b) => {
           // Maintain the order from likedProjectIds
-          const aIndex = likedProjectIds.findIndex(like => like.projectId.toString() === a._id!.toString())
-          const bIndex = likedProjectIds.findIndex(like => like.projectId.toString() === b._id!.toString())
-          return aIndex - bIndex
+          const aIndex = likedProjectIds.findIndex(
+            (like) => like.projectId.toString() === a._id!.toString()
+          );
+          const bIndex = likedProjectIds.findIndex(
+            (like) => like.projectId.toString() === b._id!.toString()
+          );
+          return aIndex - bIndex;
         })
-    : []
+      : [];
 
   // Get base URL - prioritize NEXT_PUBLIC_BASE_URL from .env, fallback to request headers
-  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   if (!baseUrl) {
-    const headersList = await headers()
-    const host = headersList.get('host') || 'localhost:3000'
-    const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https')
-    baseUrl = `${protocol}://${host}`
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3000";
+    const protocol =
+      headersList.get("x-forwarded-proto") ||
+      (host.includes("localhost") ? "http" : "https");
+    baseUrl = `${protocol}://${host}`;
   }
-  const portfolioUrl = `${baseUrl}/profile/${session.user.id}`
+  const portfolioUrl = `${baseUrl}/profile/${session.user.id}`;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {session.user.name}!</p>
+          <p className="text-muted-foreground">
+            Welcome back, {session.user.name}!
+          </p>
         </div>
 
         {/* Portfolio Link Card */}
-        <PortfolioLinkCard userId={session.user.id} portfolioUrl={portfolioUrl} />
+        <PortfolioLinkCard
+          userId={session.user.id}
+          portfolioUrl={portfolioUrl}
+        />
 
         {/* Enhanced Stats Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -123,11 +172,15 @@ export default async function Dashboard() {
             value={projectsCount}
             description="Total projects created"
             icon={FolderKanban}
-            trend={projectsCount > 0 ? {
-              value: projectGrowthRate,
-              label: 'vs last 7 days',
-              isPositive: projectGrowthRate >= 0,
-            } : undefined}
+            trend={
+              projectsCount > 0
+                ? {
+                    value: projectGrowthRate,
+                    label: "vs last 7 days",
+                    isPositive: projectGrowthRate >= 0,
+                  }
+                : undefined
+            }
           />
           <StatsCard
             title="Collaborations"
@@ -170,10 +223,14 @@ export default async function Dashboard() {
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle>Top Performing Projects</CardTitle>
-                  <CardDescription>Your projects with the most views</CardDescription>
+                  <CardDescription>
+                    Your projects with the most views
+                  </CardDescription>
                 </div>
                 <Link href="/projects">
-                  <Button variant="outline" size="sm">View All</Button>
+                  <Button variant="outline" size="sm">
+                    View All
+                  </Button>
                 </Link>
               </div>
             </CardHeader>
@@ -182,11 +239,11 @@ export default async function Dashboard() {
                 {analytics.topProjects.map((project) => (
                   <div
                     key={project.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors flex-col md:flex-row gap-2"
                   >
                     <div className="flex-1">
                       <h3 className="font-semibold mb-1">{project.title}</h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex w-full justify-between md:justify-start items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Eye className="h-4 w-4" />
                           {project.views} views
@@ -198,8 +255,12 @@ export default async function Dashboard() {
                         <Badge variant="outline">{project.category}</Badge>
                       </div>
                     </div>
-                    <Link href={`/projects/${project.id}`}>
-                      <Button variant="outline" size="sm">
+                    <Link
+                      href={`/projects/${project.id}`}
+                      className="w-full md:w-fit block"
+                    >
+                      <Button variant="outline" size="sm" className="w-full">
+                        <ExternalLink className="h-4 w-4 mr-2" />
                         View
                       </Button>
                     </Link>
@@ -229,20 +290,28 @@ export default async function Dashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Full Name</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Full Name
+                </p>
                 <p className="text-base">{session.user.name}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Email
+                </p>
                 <p className="text-base">{session.user.email}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Index Number</p>
-                <p className="text-base">{(session.user as any).indexNumber}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Index Number
+                </p>
+                <p className="text-base">{session.user.indexNumber}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Registration Number</p>
-                <p className="text-base">{(session.user as any).registrationNumber}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Registration Number
+                </p>
+                <p className="text-base">{session.user.registrationNumber}</p>
               </div>
             </CardContent>
           </Card>
@@ -289,7 +358,10 @@ export default async function Dashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {likedProjects.map((project) => (
-                <Card key={project._id!.toString()} className="flex flex-col overflow-hidden">
+                <Card
+                  key={project._id!.toString()}
+                  className="flex flex-col overflow-hidden"
+                >
                   {project.thumbnailUrl && (
                     <div className="relative w-full h-48 bg-muted overflow-hidden">
                       <img
@@ -301,12 +373,20 @@ export default async function Dashboard() {
                   )}
                   <CardHeader>
                     <div className="flex justify-between items-start mb-2">
-                      <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
+                      <Badge
+                        variant={
+                          project.status === "completed"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
                         {project.status}
                       </Badge>
                       <Badge variant="outline">{project.category}</Badge>
                     </div>
-                    <CardTitle className="line-clamp-1">{project.title}</CardTitle>
+                    <CardTitle className="line-clamp-1">
+                      {project.title}
+                    </CardTitle>
                     <CardDescription className="line-clamp-2">
                       {project.description}
                     </CardDescription>
@@ -314,7 +394,11 @@ export default async function Dashboard() {
                   <CardContent className="grow">
                     <div className="flex flex-wrap gap-2 mb-4">
                       {project.tags.slice(0, 3).map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {tag}
                         </Badge>
                       ))}
@@ -337,7 +421,7 @@ export default async function Dashboard() {
                       <span>•</span>
                       <span>
                         {project.teamMembers.length} member
-                        {project.teamMembers.length !== 1 ? 's' : ''}
+                        {project.teamMembers.length !== 1 ? "s" : ""}
                       </span>
                     </div>
                   </CardContent>
@@ -360,7 +444,9 @@ export default async function Dashboard() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Recent Projects</h2>
             <Link href="/projects">
-              <Button variant="outline" size="sm">View All</Button>
+              <Button variant="outline" size="sm">
+                View All
+              </Button>
             </Link>
           </div>
 
@@ -378,7 +464,10 @@ export default async function Dashboard() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recentProjects.map((project) => (
-                <Card key={project._id!.toString()} className="flex flex-col overflow-hidden">
+                <Card
+                  key={project._id!.toString()}
+                  className="flex flex-col overflow-hidden"
+                >
                   {project.thumbnailUrl && (
                     <div className="relative w-full h-48 bg-muted overflow-hidden">
                       <img
@@ -390,12 +479,20 @@ export default async function Dashboard() {
                   )}
                   <CardHeader>
                     <div className="flex justify-between items-start mb-2">
-                      <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
+                      <Badge
+                        variant={
+                          project.status === "completed"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
                         {project.status}
                       </Badge>
                       <Badge variant="outline">{project.category}</Badge>
                     </div>
-                    <CardTitle className="line-clamp-1">{project.title}</CardTitle>
+                    <CardTitle className="line-clamp-1">
+                      {project.title}
+                    </CardTitle>
                     <CardDescription className="line-clamp-2">
                       {project.description}
                     </CardDescription>
@@ -403,7 +500,11 @@ export default async function Dashboard() {
                   <CardContent className="grow">
                     <div className="flex flex-wrap gap-2 mb-4">
                       {project.tags.slice(0, 3).map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {tag}
                         </Badge>
                       ))}
@@ -426,7 +527,7 @@ export default async function Dashboard() {
                       <span>•</span>
                       <span>
                         {project.teamMembers.length} member
-                        {project.teamMembers.length !== 1 ? 's' : ''}
+                        {project.teamMembers.length !== 1 ? "s" : ""}
                       </span>
                     </div>
                   </CardContent>
@@ -445,5 +546,5 @@ export default async function Dashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

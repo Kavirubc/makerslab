@@ -261,7 +261,7 @@ export function ProjectForm() {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 placeholder="React, Node.js, MongoDB..."
-                onKeyPress={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
                     handleAddTag()

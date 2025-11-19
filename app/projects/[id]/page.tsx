@@ -1,65 +1,71 @@
-import { notFound } from 'next/navigation'
-import { getDatabase } from '@/lib/mongodb'
-import { Project } from '@/lib/models/Project'
-import { User } from '@/lib/models/User'
-import { ObjectId } from 'mongodb'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Eye, ExternalLink, Github, FileText, Video, Globe, Heart } from 'lucide-react'
-import Link from 'next/link'
-import { VideoEmbed } from '@/components/video-embed'
-import { ReportProjectButton } from '@/components/report-project-button'
-import { LikeButton } from '@/components/like-button'
-import { ShareButton } from '@/components/share-button'
-import ReactMarkdown from 'react-markdown'
-import { auth } from '@/auth'
-import { ProjectLike } from '@/lib/models/ProjectLike'
+import { notFound } from "next/navigation";
+import { getDatabase } from "@/lib/mongodb";
+import { Project } from "@/lib/models/Project";
+import { User } from "@/lib/models/User";
+import { ObjectId } from "mongodb";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Eye,
+  ExternalLink,
+  Github,
+  FileText,
+  Video,
+  Globe,
+  Heart,
+} from "lucide-react";
+import Link from "next/link";
+import { VideoEmbed } from "@/components/video-embed";
+import { ReportProjectButton } from "@/components/report-project-button";
+import { LikeButton } from "@/components/like-button";
+import { ShareButton } from "@/components/share-button";
+import ReactMarkdown from "react-markdown";
+import { auth } from "@/auth";
+import { ProjectLike } from "@/lib/models/ProjectLike";
 
 interface ProjectPageProps {
   params: Promise<{
-    id: string
-  }>
+    id: string;
+  }>;
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { id } = await params
+  const { id } = await params;
 
   if (!ObjectId.isValid(id)) {
-    notFound()
+    notFound();
   }
 
-  const db = await getDatabase()
+  const db = await getDatabase();
 
-  const project = await db.collection<Project>('projects').findOne({
-    _id: new ObjectId(id)
-  })
+  const project = await db.collection<Project>("projects").findOne({
+    _id: new ObjectId(id),
+  });
 
   if (!project) {
-    notFound()
+    notFound();
   }
 
   // Get project owner info
-  const owner = await db.collection<User>('users').findOne({
-    _id: project.userId
-  })
+  const owner = await db.collection<User>("users").findOne({
+    _id: project.userId,
+  });
 
   // Check if current user has liked this project
-  const session = await auth()
-  let isLiked = false
+  const session = await auth();
+  let isLiked = false;
   if (session?.user) {
-    const like = await db.collection<ProjectLike>('projectLikes').findOne({
+    const like = await db.collection<ProjectLike>("projectLikes").findOne({
       userId: new ObjectId(session.user.id),
-      projectId: new ObjectId(id)
-    })
-    isLiked = !!like
+      projectId: new ObjectId(id),
+    });
+    isLiked = !!like;
   }
 
   // Increment view count
-  await db.collection<Project>('projects').updateOne(
-    { _id: new ObjectId(id) },
-    { $inc: { views: 1 } }
-  )
+  await db
+    .collection<Project>("projects")
+    .updateOne({ _id: new ObjectId(id) }, { $inc: { views: 1 } });
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
@@ -73,51 +79,63 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 alt={project.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-6">
+              <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-6 flex flex-col">
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <Badge variant={project.status === 'completed' ? 'default' : 'secondary'} className="bg-primary">
+                  <Badge
+                    variant={
+                      project.status === "completed" ? "default" : "secondary"
+                    }
+                    className="bg-primary"
+                  >
                     {project.status}
                   </Badge>
-                  <Badge variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white/20">
+                  <Badge
+                    variant="outline"
+                    className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                  >
                     {project.category}
                   </Badge>
                 </div>
-                <h1 className="text-4xl font-bold text-white mb-2">{project.title}</h1>
-                <div className="flex items-center gap-4 text-white/90 text-sm">
-                  <span className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    {project.views} views
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Heart className="h-4 w-4" />
-                    {project.likes || 0} likes
-                  </span>
-                  <span>•</span>
-                  <span>
-                    By{' '}
-                    <Link
-                      href={`/profile/${owner?._id}`}
-                      className="text-primary hover:underline"
-                    >
-                      {owner?.name}
-                    </Link>
-                  </span>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  {project.title}
+                </h1>
+                <div className="flex md:items-center gap-4 text-white/90 text-sm  flex-col md:flex-row">
+                  <div className="flex w-full justify-between md:justify-start md:gap-4">
+                    <span className="flex items-center gap-1 md:gap-1">
+                      <Eye className="h-4 w-4" />
+                      {project.views} views
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span>•</span>
+                      <Heart className="h-4 w-4" />
+                      {project.likes || 0} likes
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span>•</span>
+                      By{" "}
+                      <Link
+                        href={`/profile/${owner?._id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {owner?.name}
+                      </Link>
+                    </span>
+                  </div>
+                  {/* Like and Share Buttons - Bottom Right */}
+                  <div className="md:absolute md:bottom-6 md:right-6 flex gap-2">
+                    <LikeButton
+                      projectId={id}
+                      initialLikesCount={project.likes || 0}
+                      initialIsLiked={isLiked}
+                      iconOnly={true}
+                    />
+                    <ShareButton
+                      projectId={id}
+                      projectTitle={project.title}
+                      iconOnly={true}
+                    />
+                  </div>
                 </div>
-              </div>
-              {/* Like and Share Buttons - Bottom Right */}
-              <div className="absolute bottom-6 right-6 flex gap-2">
-                <LikeButton
-                  projectId={id}
-                  initialLikesCount={project.likes || 0}
-                  initialIsLiked={isLiked}
-                  iconOnly={true}
-                />
-                <ShareButton
-                  projectId={id}
-                  projectTitle={project.title}
-                  iconOnly={true}
-                />
               </div>
             </div>
           )}
@@ -126,7 +144,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           {!project.thumbnailUrl && (
             <div className="relative">
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
+                <Badge
+                  variant={
+                    project.status === "completed" ? "default" : "secondary"
+                  }
+                >
                   {project.status}
                 </Badge>
                 <Badge variant="outline">{project.category}</Badge>
@@ -144,7 +166,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </span>
                 <span>•</span>
                 <span>
-                  By{' '}
+                  By{" "}
                   <Link
                     href={`/profile/${owner?._id}`}
                     className="text-primary hover:underline"
@@ -224,7 +246,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               )}
 
               {/* Links */}
-              <div className='mt-6 border rounded-lg p-6'>
+              <div className="mt-6 border rounded-lg p-6">
                 <h2 className="text-2xl font-bold mb-4">Resources</h2>
                 <div className="space-y-2">
                   {project.githubUrl && (
@@ -239,7 +261,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium">Source Code</p>
-                        <p className="text-xs text-muted-foreground">View on GitHub</p>
+                        <p className="text-xs text-muted-foreground">
+                          View on GitHub
+                        </p>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </a>
@@ -257,7 +281,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium">Presentation</p>
-                        <p className="text-xs text-muted-foreground">View slides deck</p>
+                        <p className="text-xs text-muted-foreground">
+                          View slides deck
+                        </p>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </a>
@@ -275,17 +301,22 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium">Pitch Video</p>
-                        <p className="text-xs text-muted-foreground">Watch on YouTube</p>
+                        <p className="text-xs text-muted-foreground">
+                          Watch on YouTube
+                        </p>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </a>
                   )}
 
-                  {!project.githubUrl && !project.slidesDeckUrl && !project.pitchVideoUrl && !project.demoUrl && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No resources available
-                    </p>
-                  )}
+                  {!project.githubUrl &&
+                    !project.slidesDeckUrl &&
+                    !project.pitchVideoUrl &&
+                    !project.demoUrl && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No resources available
+                      </p>
+                    )}
                 </div>
               </div>
 
@@ -296,10 +327,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   <div>
                     <p className="text-sm text-muted-foreground">Created</p>
                     <p className="text-sm font-medium">
-                      {new Date(project.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
+                      {new Date(project.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
                   </div>
@@ -307,10 +338,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     <div>
                       <p className="text-sm text-muted-foreground">Completed</p>
                       <p className="text-sm font-medium">
-                        {new Date(project.endDate).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
+                        {new Date(project.endDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         })}
                       </p>
                     </div>
@@ -327,7 +358,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </h2>
                   <div className="space-y-3">
                     {project.teamMembers.map((member, index) => (
-                      <div key={index} className="flex justify-between items-start py-3">
+                      <div
+                        key={index}
+                        className="flex justify-between items-start py-3"
+                      >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             {member.userId ? (
@@ -338,7 +372,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                                 {member.name}
                               </Link>
                             ) : (
-                              <p className="font-semibold text-foreground">{member.name}</p>
+                              <p className="font-semibold text-foreground">
+                                {member.name}
+                              </p>
                             )}
                             {member.userId && (
                               <Badge variant="secondary" className="text-xs">
@@ -346,7 +382,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground">{member.role}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {member.role}
+                          </p>
                           {member.indexNumber && (
                             <p className="text-xs text-muted-foreground">
                               {member.indexNumber}
@@ -376,5 +414,5 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
