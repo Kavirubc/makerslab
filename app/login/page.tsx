@@ -9,10 +9,12 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useNotification } from '@/lib/hooks/use-notification'
+import { Eye, EyeOff } from 'lucide-react'
 
 function LoginForm() {
     const [email, setEmail] = React.useState('')
     const [password, setPassword] = React.useState('')
+    const [showPassword, setShowPassword] = React.useState(false)
     const [error, setError] = React.useState('')
     const [isLoading, setIsLoading] = React.useState(false)
     const router = useRouter()
@@ -58,69 +60,87 @@ function LoginForm() {
     }
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <Card className="w-full max-w-md mx-auto">
-                    <CardHeader className="space-y-1">
-                        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-                        <CardDescription className="mb-4">
-                            Enter your credentials to access your account
-                        </CardDescription>
-                    </CardHeader>
-                    <form onSubmit={handleSubmit}>
-                        <CardContent className="space-y-4">
-                            {/* Inline error for form validation - toast for API errors */}
-                            {error && (
-                                <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
-                                    {error}
+                <div className="w-full max-w-md mx-auto lg:max-w-2xl">
+                    <Card className="w-full">
+                        <CardHeader className="space-y-2 pb-6">
+                            <CardTitle className="text-3xl font-bold">Welcome back</CardTitle>
+                            <CardDescription className="text-base">
+                                Enter your credentials to access your account
+                            </CardDescription>
+                        </CardHeader>
+                        <form onSubmit={handleSubmit}>
+                            <CardContent className="space-y-6">
+                                {/* Inline error for form validation - toast for API errors */}
+                                {error && (
+                                    <div className="p-4 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
+                                        {error}
+                                    </div>
+                                )}
+                                <div className="space-y-2">
+                                    <Label htmlFor="email" className="text-sm font-medium">Email (must end with .ac.lk)</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="2022is031@ucsc.cmb.ac.lk"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        disabled={isLoading}
+                                        className="h-11"
+                                    />
                                 </div>
-                            )}
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email (must end with .ac.lk)</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="2022is031@ucsc.cmb.ac.lk"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="password">Password</Label>
-                                    <Link
-                                        href="/forget-password"
-                                        className="text-sm text-primary hover:underline"
-                                    >
-                                        Forgot password?
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                                        <Link
+                                            href="/forget-password"
+                                            className="text-sm text-primary hover:underline font-medium"
+                                        >
+                                            Forgot password?
+                                        </Link>
+                                    </div>
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Enter your password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            disabled={isLoading}
+                                            className="h-11 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            disabled={isLoading}
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="flex flex-col space-y-4 pt-6">
+                                <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
+                                    {isLoading ? 'Signing in...' : 'Sign in'}
+                                </Button>
+                                <p className="text-sm text-center text-muted-foreground">
+                                    Don&apos;t have an account?{' '}
+                                    <Link href="/register" className="text-primary hover:underline font-medium">
+                                        Sign up
                                     </Link>
-                                </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col space-y-4 pt-4">
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? 'Signing in...' : 'Sign in'}
-                            </Button>
-                            <p className="text-sm text-center text-muted-foreground">
-                                Don&apos;t have an account?{' '}
-                                <Link href="/register" className="text-primary hover:underline font-medium">
-                                    Sign up
-                                </Link>
-                            </p>
-                        </CardFooter>
-                    </form>
-                </Card>
+                                </p>
+                            </CardFooter>
+                        </form>
+                    </Card>
+                </div>
             </div>
         </div>
     )
@@ -129,11 +149,11 @@ function LoginForm() {
 export default function Login() {
     return (
         <Suspense fallback={
-            <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+            <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background">
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <Card className="w-full max-w-md mx-auto">
+                    <Card className="w-full max-w-md mx-auto lg:max-w-2xl">
                         <CardHeader className="space-y-1">
-                            <CardTitle className="text-2xl font-bold">Loading...</CardTitle>
+                            <CardTitle className="text-3xl font-bold">Loading...</CardTitle>
                         </CardHeader>
                     </Card>
                 </div>

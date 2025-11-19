@@ -2,8 +2,9 @@ import { ObjectId } from 'mongodb'
 
 export interface UniversityRequest {
   _id?: ObjectId
-  userId: ObjectId // User who requested the university
+  userId?: ObjectId | null // User who requested the university (null for public requests)
   name: string // University name
+  facultyName?: string | null // Faculty name (optional, for cases where different faculties have different email domains)
   district: string
   province: string
   emailDomain: string // Email domain (e.g., "ucsc.cmb.ac.lk")

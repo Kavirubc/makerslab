@@ -32,8 +32,9 @@ interface UniversityData {
 
 interface UniversityRequestData {
   _id: string
-  userId: string
+  userId?: string | null
   name: string
+  facultyName?: string | null
   district: string
   province: string
   emailDomain: string
@@ -238,6 +239,7 @@ export default function AdminUniversitiesPage() {
                       </div>
                       <div className="text-sm text-muted-foreground space-y-1">
                         <p><strong>Email Domain:</strong> {request.emailDomain}</p>
+                        {request.facultyName && <p><strong>Faculty:</strong> {request.facultyName}</p>}
                         <p><strong>Location:</strong> {request.district}, {request.province}</p>
                         {request.reason && <p><strong>Reason:</strong> {request.reason}</p>}
                         <p><strong>Requested:</strong> {new Date(request.createdAt).toLocaleDateString()}</p>
@@ -466,6 +468,12 @@ export default function AdminUniversitiesPage() {
                   <Label>University Name</Label>
                   <p className="text-sm">{selectedRequest.name}</p>
                 </div>
+                {selectedRequest.facultyName && (
+                  <div className="space-y-2">
+                    <Label>Faculty Name</Label>
+                    <p className="text-sm">{selectedRequest.facultyName}</p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label>Email Domain</Label>
                   <p className="text-sm">{selectedRequest.emailDomain}</p>

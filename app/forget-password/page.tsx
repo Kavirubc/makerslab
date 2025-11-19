@@ -57,52 +57,60 @@ export default function ForgetPassword() {
     }
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <Card className="w-full max-w-md mx-auto">
-                    <CardHeader className="space-y-1">
-                        <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
-                        <CardDescription>
-                            Enter your email address to proceed with password reset
-                        </CardDescription>
-                    </CardHeader>
-                    <form onSubmit={handleSubmit}>
-                        <CardContent className="space-y-4">
-                            {/* Inline error for form validation - toast for API responses */}
-                            {error && (
-                                <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
-                                    {error}
+                <div className="w-full max-w-md mx-auto lg:max-w-2xl">
+                    <Card className="w-full">
+                        <CardHeader className="space-y-2 pb-6">
+                            <CardTitle className="text-3xl font-bold">Forgot Password</CardTitle>
+                            <CardDescription className="text-base">
+                                Enter your email address to proceed with password reset
+                            </CardDescription>
+                        </CardHeader>
+                        <form onSubmit={handleSubmit}>
+                            <CardContent className="space-y-6">
+                                {/* Inline error for form validation - toast for API responses */}
+                                {error && (
+                                    <div className="p-4 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
+                                        {error}
+                                    </div>
+                                )}
+                                {success && (
+                                    <div className="p-4 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/50 rounded-md">
+                                        {success}
+                                    </div>
+                                )}
+                                <div className="space-y-2">
+                                    <Label htmlFor="email" className="text-sm font-medium">Email (must end with .ac.lk)</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="2022is031@ucsc.cmb.ac.lk"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        disabled={isLoading}
+                                        className="h-11"
+                                    />
                                 </div>
-                            )}
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email (must end with .ac.lk)</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="2022is031@ucsc.cmb.ac.lk"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                                <p>You will need your index number to reset your password.</p>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col space-y-4 pt-4">
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? 'Processing...' : 'Continue'}
-                            </Button>
-                            <p className="text-sm text-center text-muted-foreground">
-                                Remember your password?{' '}
-                                <Link href="/login" className="text-primary hover:underline font-medium">
-                                    Sign in
-                                </Link>
-                            </p>
-                        </CardFooter>
-                    </form>
-                </Card>
+                                <div className="text-sm text-muted-foreground">
+                                    <p>You will need your index number to reset your password.</p>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="flex flex-col space-y-4 pt-6">
+                                <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
+                                    {isLoading ? 'Processing...' : 'Continue'}
+                                </Button>
+                                <p className="text-sm text-center text-muted-foreground">
+                                    Remember your password?{' '}
+                                    <Link href="/login" className="text-primary hover:underline font-medium">
+                                        Sign in
+                                    </Link>
+                                </p>
+                            </CardFooter>
+                        </form>
+                    </Card>
+                </div>
             </div>
         </div>
     )
