@@ -228,6 +228,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     key={project._id?.toString()}
                     className="flex flex-col hover:shadow-lg transition-shadow"
                   >
+                    {project.thumbnailUrl && (
+                      <div className="relative w-full h-48 bg-muted overflow-hidden">
+                        <img
+                          src={project.thumbnailUrl}
+                          alt={project.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardHeader>
                       <div className="flex justify-between items-start mb-2">
                         <Badge
