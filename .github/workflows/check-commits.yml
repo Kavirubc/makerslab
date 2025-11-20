@@ -1,0 +1,157 @@
+name: Check Commit Signatures
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  check-signatures:
+    runs-on: ubuntu-latest
+    name: Verify Commit Signatures
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Check commit signatures
+        id: check
+        run: |
+          echo "Checking signatures for commits in this PR..."
+          
+          # Get the base SHA
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          
+          # Get list of commits in the PR
+          COMMITS=$(git rev-list ${BASE_SHA}..${HEAD_SHA})
+          
+          UNSIGNED_COUNT=0
+          UNSIGNED_COMMITS=""
+          
+          for commit in $COMMITS; do
+            # Check if commit is signed
+            if ! git verify-commit $commit 2>/dev/null; then
+              UNSIGNED_COUNT=$((UNSIGNED_COUNT + 1))
+              COMMIT_MSG=$(git log -1 --format="%h %s" $commit)
+              UNSIGNED_COMMITS="${UNSIGNED_COMMITS}\n- ${COMMIT_MSG}"
+            fi
+          done
+          
+          echo "unsigned_count=${UNSIGNED_COUNT}" >> $GITHUB_OUTPUT
+          echo "unsigned_commits<<EOF" >> $GITHUB_OUTPUT
+          echo -e "${UNSIGNED_COMMITS}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          if [ $UNSIGNED_COUNT -gt 0 ]; then
+            echo "❌ Found ${UNSIGNED_COUNT} unsigned commit(s)"
+            exit 1
+          else
+            echo "✅ All commits are signed"
+            exit 0
+          fi
+
+      - name: Comment on PR (unsigned commits found)
+        if: failure() && steps.check.outputs.unsigned_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const unsignedCount = '${{ steps.check.outputs.unsigned_count }}';
+            const unsignedCommits = `${{ steps.check.outputs.unsigned_commits }}`;
+            
+            const body = `## ⚠️ Unsigned Commits Detected
+            
+            This pull request contains **${unsignedCount}** unsigned commit(s). All commits must be signed to merge.
+            
+            ### Unsigned Commits:
+            ${unsignedCommits}
+            
+            ### How to Fix:
+            
+            1. **Set up commit signing** if you haven't already:
+               - See [Commit Signing Setup](../blob/main/CONTRIBUTING.md#1-commit-signing-policy) for detailed instructions
+            
+            2. **Sign your existing commits**:
+               \`\`\`bash
+               # Checkout your branch
+               git checkout ${{ github.head_ref }}
+               
+               # Sign all commits retroactively
+               git rebase --exec 'git commit --amend --no-edit -n -S' -i origin/main
+               
+               # Force push the signed commits
+               git push --force-with-lease
+               \`\`\`
+            
+            3. **Verify signatures**:
+               \`\`\`bash
+               git log --show-signature
+               \`\`\`
+            
+            Need more help? Check the [Merge Troubleshooting Guide](../blob/main/MERGE_TROUBLESHOOTING.md).`;
+            
+            // Check if we already commented
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Unsigned Commits Detected')
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Comment on PR (all signed)
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## ✅ All Commits Signed
+            
+            Great! All commits in this PR are properly signed.`;
+            
+            // Check if we have an existing unsigned commits warning
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Unsigned Commits Detected')
+            );
+            
+            if (botComment) {
+              // Update the warning to show success
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            }
