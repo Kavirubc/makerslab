@@ -1,57 +1,73 @@
-import { notFound } from 'next/navigation'
-import { getDatabase } from '@/lib/mongodb'
-import { User } from '@/lib/models/User'
-import { Project } from '@/lib/models/Project'
-import { University } from '@/lib/models/University'
-import { ObjectId } from 'mongodb'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ContributorBadge } from '@/components/contributor-badge'
-import { Mail, MapPin, School, Eye, Linkedin, Github, FileText, Edit, Heart } from 'lucide-react'
-import Link from 'next/link'
-import { auth } from '@/auth'
+import { notFound } from "next/navigation";
+import { getDatabase } from "@/lib/mongodb";
+import { User } from "@/lib/models/User";
+import { Project } from "@/lib/models/Project";
+import { University } from "@/lib/models/University";
+import { ObjectId } from "mongodb";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ContributorBadge } from "@/components/contributor-badge";
+import {
+  Mail,
+  MapPin,
+  School,
+  Eye,
+  Linkedin,
+  Github,
+  FileText,
+  Edit,
+  Heart,
+} from "lucide-react";
+import Link from "next/link";
+import { auth } from "@/auth";
 
 interface ProfilePageProps {
   params: Promise<{
-    id: string
-  }>
+    id: string;
+  }>;
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  const { id } = await params
+  const { id } = await params;
 
   if (!ObjectId.isValid(id)) {
-    notFound()
+    notFound();
   }
 
-  const session = await auth()
-  const isOwner = session?.user?.id === id
+  const session = await auth();
+  const isOwner = session?.user?.id === id;
 
-  const db = await getDatabase()
+  const db = await getDatabase();
 
-  const user = await db.collection<User>('users').findOne({
-    _id: new ObjectId(id)
-  })
+  const user = await db.collection<User>("users").findOne({
+    _id: new ObjectId(id),
+  });
 
   if (!user) {
-    notFound()
+    notFound();
   }
 
   // Get university info
-  const university = await db.collection<University>('universities').findOne({
-    _id: user.universityId
-  })
+  const university = await db.collection<University>("universities").findOne({
+    _id: user.universityId,
+  });
 
   // Get user's public projects
   const projects = await db
-    .collection<Project>('projects')
+    .collection<Project>("projects")
     .find({ userId: new ObjectId(id), isPublic: true })
     .sort({ updatedAt: -1 })
-    .toArray()
+    .toArray();
 
-  const totalViews = projects.reduce((sum, project) => sum + project.views, 0)
+  const totalViews = projects.reduce((sum, project) => sum + project.views, 0);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
@@ -61,27 +77,32 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex-shrink-0">
+                <div className=" shrink-0">
                   <Avatar className="w-32 h-32">
-                    <AvatarImage src={user.profilePicture || undefined} alt={user.name} />
+                    <AvatarImage
+                      src={user.profilePicture || undefined}
+                      alt={user.name}
+                    />
                     <AvatarFallback className="text-3xl">
                       {user.name
-                        .split(' ')
+                        .split(" ")
                         .map((n) => n[0])
-                        .join('')
+                        .join("")
                         .toUpperCase()
                         .slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
                 </div>
 
-                <div className="flex-grow space-y-4">
+                <div className=" grow space-y-4">
                   <div>
-                    <div className="flex items-baseline gap-3 mb-2">
+                    <div className="flex items-baseline gap-2 mb-2 flex-col md:flex-row md:items-center md:gap-3">
                       <h1 className="text-3xl font-bold">{user.name}</h1>
                       {/* Contributor badge with glassy styling - aligned with name baseline */}
                       {user.contributorType && (
-                        <ContributorBadge contributorType={user.contributorType} />
+                        <ContributorBadge
+                          contributorType={user.contributorType}
+                        />
                       )}
                     </div>
                     {user.bio && (
@@ -114,7 +135,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     </div>
                     <div>
                       <p className="text-2xl font-bold">{totalViews}</p>
-                      <p className="text-sm text-muted-foreground">Total Views</p>
+                      <p className="text-sm text-muted-foreground">
+                        Total Views
+                      </p>
                     </div>
                   </div>
 
@@ -166,7 +189,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       <p className="font-medium">{user.indexNumber}</p>
                     </div>
                     <div className="text-sm">
-                      <p className="text-muted-foreground">Registration Number</p>
+                      <p className="text-muted-foreground">
+                        Registration Number
+                      </p>
                       <p className="font-medium">{user.registrationNumber}</p>
                     </div>
                   </div>
@@ -207,14 +232,18 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       <div className="flex justify-between items-start mb-2">
                         <Badge
                           variant={
-                            project.status === 'completed' ? 'default' : 'secondary'
+                            project.status === "completed"
+                              ? "default"
+                              : "secondary"
                           }
                         >
                           {project.status}
                         </Badge>
                         <Badge variant="outline">{project.category}</Badge>
                       </div>
-                      <CardTitle className="line-clamp-2">{project.title}</CardTitle>
+                      <CardTitle className="line-clamp-2">
+                        {project.title}
+                      </CardTitle>
                       <CardDescription className="line-clamp-3">
                         {project.description}
                       </CardDescription>
@@ -222,7 +251,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <CardContent className="flex-grow space-y-4">
                       <div className="flex flex-wrap gap-2">
                         {project.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {tag}
                           </Badge>
                         ))}
@@ -246,7 +279,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         <span>•</span>
                         <span>
                           {project.teamMembers.length} member
-                          {project.teamMembers.length !== 1 ? 's' : ''}
+                          {project.teamMembers.length !== 1 ? "s" : ""}
                         </span>
                       </div>
                     </CardContent>
@@ -263,5 +296,5 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

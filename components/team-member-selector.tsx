@@ -1,74 +1,80 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-import { X, Search, UserPlus } from 'lucide-react'
-import { User } from '@/lib/models/User'
-import { useNotification } from '@/lib/hooks/use-notification'
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { X, Search, UserPlus } from "lucide-react";
+import { User } from "@/lib/models/User";
+import { useNotification } from "@/lib/hooks/use-notification";
 
 interface TeamMember {
-  name: string
-  email: string
-  role: string
-  indexNumber?: string
-  userId?: string // If they're a registered user
+  name: string;
+  email: string;
+  role: string;
+  indexNumber?: string;
+  userId?: string; // If they're a registered user
 }
 
 interface TeamMemberSelectorProps {
-  teamMembers: TeamMember[]
-  onChange: (members: TeamMember[]) => void
-  disabled?: boolean
+  teamMembers: TeamMember[];
+  onChange: (members: TeamMember[]) => void;
+  disabled?: boolean;
 }
 
-export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemberSelectorProps) {
-  const [mode, setMode] = useState<'search' | 'manual'>('search')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<User[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [role, setRole] = useState('')
-  const { success, warning } = useNotification()
+export function TeamMemberSelector({
+  teamMembers,
+  onChange,
+  disabled,
+}: TeamMemberSelectorProps) {
+  const [mode, setMode] = useState<"search" | "manual">("search");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [role, setRole] = useState("");
+  const { success, warning } = useNotification();
 
   // Manual mode states
-  const [manualName, setManualName] = useState('')
-  const [manualEmail, setManualEmail] = useState('')
-  const [manualRole, setManualRole] = useState('')
-  const [manualIndex, setManualIndex] = useState('')
+  const [manualName, setManualName] = useState("");
+  const [manualEmail, setManualEmail] = useState("");
+  const [manualRole, setManualRole] = useState("");
+  const [manualIndex, setManualIndex] = useState("");
 
   // Search for users
   useEffect(() => {
-    if (mode === 'search' && searchQuery.length >= 3) {
+    if (mode === "search" && searchQuery.length >= 3) {
       const timeoutId = setTimeout(() => {
-        searchUsers()
-      }, 300)
-      return () => clearTimeout(timeoutId)
+        searchUsers();
+      }, 300);
+      return () => clearTimeout(timeoutId);
     } else {
-      setSearchResults([])
+      setSearchResults([]);
     }
-  }, [searchQuery, mode])
+  }, [searchQuery, mode]);
 
   const searchUsers = async () => {
-    setIsSearching(true)
+    setIsSearching(true);
     try {
-      const response = await fetch(`/api/users/search?email=${encodeURIComponent(searchQuery)}`)
-      const data = await response.json()
-      setSearchResults(data.users || [])
+      const response = await fetch(
+        `/api/users/search?email=${encodeURIComponent(searchQuery)}`
+      );
+      const data = await response.json();
+      setSearchResults(data.users || []);
     } catch (error) {
-      console.error('Error searching users:', error)
+      console.error("Error searching users:", error);
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }
+  };
 
   const handleSelectUser = (user: User) => {
-    setSelectedUser(user)
-    setSearchQuery('')
-    setSearchResults([])
-  }
+    setSelectedUser(user);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
 
   const handleAddSearchedUser = () => {
     if (selectedUser && role.trim()) {
@@ -77,16 +83,16 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
         email: selectedUser.email,
         role: role.trim(),
         indexNumber: selectedUser.indexNumber,
-        userId: selectedUser._id?.toString()
-      }
-      onChange([...teamMembers, newMember])
-      success(`${selectedUser.name} added to team`)
-      setSelectedUser(null)
-      setRole('')
+        userId: selectedUser._id?.toString(),
+      };
+      onChange([...teamMembers, newMember]);
+      success(`${selectedUser.name} added to team`);
+      setSelectedUser(null);
+      setRole("");
     } else {
-      warning('Please select a user and enter their role')
+      warning("Please select a user and enter their role");
     }
-  }
+  };
 
   const handleAddManualMember = () => {
     if (manualName.trim() && manualEmail.trim() && manualRole.trim()) {
@@ -94,31 +100,31 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
         name: manualName.trim(),
         email: manualEmail.trim(),
         role: manualRole.trim(),
-        indexNumber: manualIndex.trim() || undefined
-      }
-      onChange([...teamMembers, newMember])
-      success(`${manualName.trim()} added to team`)
-      setManualName('')
-      setManualEmail('')
-      setManualRole('')
-      setManualIndex('')
+        indexNumber: manualIndex.trim() || undefined,
+      };
+      onChange([...teamMembers, newMember]);
+      success(`${manualName.trim()} added to team`);
+      setManualName("");
+      setManualEmail("");
+      setManualRole("");
+      setManualIndex("");
     } else {
-      warning('Please fill in all required fields')
+      warning("Please fill in all required fields");
     }
-  }
+  };
 
   const handleRemoveMember = (index: number) => {
-    onChange(teamMembers.filter((_, i) => i !== index))
-  }
+    onChange(teamMembers.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="space-y-4">
       {/* Mode Toggle */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-col md:flex-row">
         <Button
           type="button"
-          variant={mode === 'search' ? 'default' : 'outline'}
-          onClick={() => setMode('search')}
+          variant={mode === "search" ? "default" : "outline"}
+          onClick={() => setMode("search")}
           disabled={disabled}
           className="flex-1"
         >
@@ -127,8 +133,8 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
         </Button>
         <Button
           type="button"
-          variant={mode === 'manual' ? 'default' : 'outline'}
-          onClick={() => setMode('manual')}
+          variant={mode === "manual" ? "default" : "outline"}
+          onClick={() => setMode("manual")}
           disabled={disabled}
           className="flex-1"
         >
@@ -138,7 +144,7 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
       </div>
 
       {/* Search Mode */}
-      {mode === 'search' && (
+      {mode === "search" && (
         <div className="space-y-4">
           {!selectedUser ? (
             <div className="space-y-2">
@@ -178,11 +184,13 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
                 </div>
               )}
 
-              {searchQuery.length >= 3 && searchResults.length === 0 && !isSearching && (
-                <p className="text-sm text-muted-foreground">
-                  No users found. Try manual entry instead.
-                </p>
-              )}
+              {searchQuery.length >= 3 &&
+                searchResults.length === 0 &&
+                !isSearching && (
+                  <p className="text-sm text-muted-foreground">
+                    No users found. Try manual entry instead.
+                  </p>
+                )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -233,7 +241,7 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
       )}
 
       {/* Manual Mode */}
-      {mode === 'manual' && (
+      {mode === "manual" && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -285,7 +293,12 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
           <Button
             type="button"
             onClick={handleAddManualMember}
-            disabled={!manualName.trim() || !manualEmail.trim() || !manualRole.trim() || disabled}
+            disabled={
+              !manualName.trim() ||
+              !manualEmail.trim() ||
+              !manualRole.trim() ||
+              disabled
+            }
             className="w-full"
           >
             <UserPlus className="h-4 w-4 mr-2" />
@@ -331,5 +344,5 @@ export function TeamMemberSelector({ teamMembers, onChange, disabled }: TeamMemb
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -125,7 +125,7 @@ export default function Settings() {
                     {/* Sidebar Navigation */}
                     <div className="lg:col-span-1">
                         <Card>
-                            <CardContent className="pt-6">
+                            <CardContent className="">
                                 <nav className="space-y-1">
                                     {tabs.map((tab) => {
                                         const Icon = tab.icon
@@ -184,7 +184,7 @@ export default function Settings() {
                                         <div className="space-y-2">
                                             <Label>Index Number</Label>
                                             <Input
-                                                value={(session.user as any)?.indexNumber || ''}
+                                                value={(session.user)?.indexNumber || ''}
                                                 disabled
                                                 className="bg-muted"
                                             />
@@ -192,7 +192,7 @@ export default function Settings() {
                                         <div className="space-y-2">
                                             <Label>Registration Number</Label>
                                             <Input
-                                                value={(session.user as any)?.registrationNumber || ''}
+                                                value={(session.user)?.registrationNumber || ''}
                                                 disabled
                                                 className="bg-muted"
                                             />
@@ -200,7 +200,7 @@ export default function Settings() {
                                         <div className="space-y-2">
                                             <Label>Role</Label>
                                             <Input
-                                                value={(session.user as any)?.role || 'user'}
+                                                value={(session.user)?.role || 'user'}
                                                 disabled
                                                 className="bg-muted capitalize"
                                             />
