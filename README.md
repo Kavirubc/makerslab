@@ -1,8 +1,8 @@
-# UCSC Project Share (Showcase.lk)
+# MakersLab (makerslab.lk)
 
 A collaborative platform designed for university students to showcase their academic projects, fostering knowledge sharing and collaboration within the university community.
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Kavirubc/ucsc-project-share)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Kavirubc/makerslab)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ## Features
@@ -45,8 +45,8 @@ A collaborative platform designed for university students to showcase their acad
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/Kavirubc/ucsc-project-share.git
-   cd ucsc-project-share
+   git clone https://github.com/Kavirubc/makerslab.git
+   cd makerslab
    ```
 
 2. **Install dependencies:**
@@ -95,7 +95,7 @@ Follow the prompts to enter the user's email address.
 ## Project Structure
 
 ```
-ucsc-project-share/
+makerslab/
 ├── app/                    # Next.js app directory
 │   ├── admin/             # Admin dashboard pages
 │   ├── explore/           # Project exploration
@@ -147,7 +147,7 @@ This project is private and proprietary. All rights reserved.
 ## Support
 
 For questions or support:
-- Open an issue on [GitHub](https://github.com/Kavirubc/ucsc-project-share/issues)
+- Open an issue on [GitHub](https://github.com/Kavirubc/makerslab/issues)
 - Contact the maintainers
 
 ---
