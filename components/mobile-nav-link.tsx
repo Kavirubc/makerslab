@@ -12,8 +12,7 @@ export function MobileLink({
 }: React.ComponentProps<typeof Link>) {
   const pathname = usePathname();
   const path = typeof href === "string" ? href : href.pathname || "";
-  const isActive =
-    path === "/" ? pathname === path : pathname?.startsWith(path);
+  const isActive = pathname === path || pathname?.startsWith(path + "/");
 
   return (
     <Link
