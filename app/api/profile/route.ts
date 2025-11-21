@@ -33,12 +33,27 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Validate ObjectId format
+    if (!ObjectId.isValid(session.user.id)) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 })
+    }
+
     const body = await request.json()
-    const { bio, linkedin, github, profilePicture, cv, cvUpdatedAt } = body
+    const { 
+      bio, 
+      linkedin, 
+      github, 
+      profilePicture, 
+      cv, 
+      cvUpdatedAt,
+      name,
+      indexNumber,
+      registrationNumber
+    } = body
 
     const db = await getDatabase()
 
@@ -47,6 +62,7 @@ export async function PUT(request: NextRequest) {
       updatedAt: new Date(),
     }
 
+    // Profile fields
     if (bio !== undefined) updateData.bio = bio
     if (linkedin !== undefined) updateData.linkedin = linkedin
     if (github !== undefined) updateData.github = github
@@ -54,6 +70,17 @@ export async function PUT(request: NextRequest) {
     if (cv !== undefined) {
       updateData.cv = cv
       updateData.cvUpdatedAt = cvUpdatedAt ? new Date(cvUpdatedAt) : new Date()
+    }
+
+    // Account information fields
+    if (name !== undefined && name.trim()) {
+      updateData.name = name.trim()
+    }
+    if (indexNumber !== undefined && indexNumber.trim()) {
+      updateData.indexNumber = indexNumber.trim()
+    }
+    if (registrationNumber !== undefined && registrationNumber.trim()) {
+      updateData.registrationNumber = registrationNumber.trim()
     }
 
     const result = await db.collection<User>('users').updateOne(

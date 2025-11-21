@@ -23,11 +23,26 @@ export default function Settings() {
     const [isLoading, setIsLoading] = React.useState(false)
     const { success: showSuccess, error: showError } = useNotification()
 
+    // Account information state
+    const [name, setName] = React.useState(session?.user?.name || '')
+    const [indexNumber, setIndexNumber] = React.useState((session?.user as any)?.indexNumber || '')
+    const [registrationNumber, setRegistrationNumber] = React.useState((session?.user as any)?.registrationNumber || '')
+    const [isAccountLoading, setIsAccountLoading] = React.useState(false)
+    const [accountError, setAccountError] = React.useState('')
+
     React.useEffect(() => {
         if (status === 'unauthenticated') {
             router.push('/login')
         }
     }, [status, router])
+
+    React.useEffect(() => {
+        if (session?.user) {
+            setName(session.user.name || '')
+            setIndexNumber((session.user as any)?.indexNumber || '')
+            setRegistrationNumber((session.user as any)?.registrationNumber || '')
+        }
+    }, [session])
 
     if (status === 'loading') {
         return (
@@ -41,6 +56,68 @@ export default function Settings() {
 
     if (!session) {
         return null
+    }
+
+    const handleAccountInfoUpdate = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setAccountError('')
+
+        // Validation
+        if (!name.trim()) {
+            const errorMessage = 'Name is required'
+            setAccountError(errorMessage)
+            showError(errorMessage)
+            return
+        }
+
+        if (!indexNumber.trim()) {
+            const errorMessage = 'Index number is required'
+            setAccountError(errorMessage)
+            showError(errorMessage)
+            return
+        }
+
+        if (!registrationNumber.trim()) {
+            const errorMessage = 'Registration number is required'
+            setAccountError(errorMessage)
+            showError(errorMessage)
+            return
+        }
+
+        setIsAccountLoading(true)
+
+        try {
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    name: name.trim(),
+                    indexNumber: indexNumber.trim(),
+                    registrationNumber: registrationNumber.trim()
+                }),
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                const errorMessage = data.error || 'An error occurred'
+                setAccountError(errorMessage)
+                showError(errorMessage)
+            } else {
+                const successMessage = 'Account information updated successfully. Please refresh the page to see changes in your session.'
+                showSuccess(successMessage)
+                // Refresh the page to update server components
+                router.refresh()
+            }
+        } catch (error) {
+            const errorMessage = 'An error occurred. Please try again.'
+            setAccountError(errorMessage)
+            showError(errorMessage)
+        } finally {
+            setIsAccountLoading(false)
+        }
     }
 
     const handlePasswordChange = async (e: React.FormEvent) => {
@@ -161,50 +238,75 @@ export default function Settings() {
                                             Your account details and basic information
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label>Email</Label>
-                                            <Input
-                                                value={session.user?.email || ''}
-                                                disabled
-                                                className="bg-muted"
-                                            />
+                                    <CardContent>
+                                        <form onSubmit={handleAccountInfoUpdate} className="space-y-4">
+                                            {accountError && (
+                                                <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
+                                                    {accountError}
+                                                </div>
+                                            )}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="email">Email</Label>
+                                                <Input
+                                                    id="email"
+                                                    value={session.user?.email || ''}
+                                                    disabled
+                                                    className="bg-muted"
+                                                />
+                                                <p className="text-xs text-muted-foreground">
+                                                    Your email address cannot be changed
+                                                </p>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="name">Full Name</Label>
+                                                <Input
+                                                    id="name"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    placeholder="Enter your full name"
+                                                    required
+                                                    disabled={isAccountLoading}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="indexNumber">Index Number</Label>
+                                                <Input
+                                                    id="indexNumber"
+                                                    value={indexNumber}
+                                                    onChange={(e) => setIndexNumber(e.target.value)}
+                                                    placeholder="e.g., 22020311"
+                                                    required
+                                                    disabled={isAccountLoading}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="registrationNumber">Registration Number</Label>
+                                                <Input
+                                                    id="registrationNumber"
+                                                    value={registrationNumber}
+                                                    onChange={(e) => setRegistrationNumber(e.target.value)}
+                                                    placeholder="e.g., 2022/IS/031"
+                                                    required
+                                                    disabled={isAccountLoading}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Role</Label>
+                                                <Input
+                                                    value={(session.user)?.role || 'user'}
+                                                    disabled
+                                                    className="bg-muted capitalize"
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <Button type="submit" disabled={isAccountLoading}>
+                                                    {isAccountLoading ? 'Updating...' : 'Update Account Information'}
+                                                </Button>
+                                            </div>
                                             <p className="text-xs text-muted-foreground">
-                                                Your email address cannot be changed
+                                                Note: Changes to account information are saved immediately. You may need to refresh the page or log out and back in to see the updated information in your session.
                                             </p>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Full Name</Label>
-                                            <Input
-                                                value={session.user?.name || ''}
-                                                disabled
-                                                className="bg-muted"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Index Number</Label>
-                                            <Input
-                                                value={(session.user)?.indexNumber || ''}
-                                                disabled
-                                                className="bg-muted"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Registration Number</Label>
-                                            <Input
-                                                value={(session.user)?.registrationNumber || ''}
-                                                disabled
-                                                className="bg-muted"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Role</Label>
-                                            <Input
-                                                value={(session.user)?.role || 'user'}
-                                                disabled
-                                                className="bg-muted capitalize"
-                                            />
-                                        </div>
+                                        </form>
                                     </CardContent>
                                 </Card>
 
