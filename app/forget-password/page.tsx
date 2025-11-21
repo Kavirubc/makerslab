@@ -81,11 +81,11 @@ export default function ForgetPassword() {
                                     </div>
                                 )}
                                 <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-sm font-medium">Email (must end with .ac.lk)</Label>
+                                    <Label htmlFor="email" className="text-sm font-medium">University Email</Label>
                                     <Input
                                         id="email"
                                         type="email"
-                                        placeholder="2022is031@ucsc.cmb.ac.lk"
+                                        placeholder="2022is031@ucsc.cmb.ac.lk or student@uom.lk"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required

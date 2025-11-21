@@ -4,6 +4,7 @@ import { getDatabase } from '@/lib/mongodb'
 import { User } from '@/lib/models/User'
 import { ObjectId } from 'mongodb'
 import bcrypt from 'bcryptjs'
+import { getUniversityByEmailDomain } from '@/lib/utils/university'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -21,9 +22,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const email = credentials.email as string
         const password = credentials.password as string
 
-        // Validate email ends with ac.lk
-        if (!email.toLowerCase().endsWith('.ac.lk')) {
-          throw new Error('Only .ac.lk email addresses are allowed')
+        // Validate email domain exists in universities database
+        const university = await getUniversityByEmailDomain(email)
+        if (!university) {
+          throw new Error('Your university email domain is not registered. Please contact support or request to add your university.')
         }
 
         const db = await getDatabase()

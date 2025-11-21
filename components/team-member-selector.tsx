@@ -155,7 +155,7 @@ export function TeamMemberSelector({
                   type="email"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="teammate@stu.ucsc.cmb.ac.lk"
+                  placeholder="teammate@stu.ucsc.cmb.ac.lk or student@uom.lk"
                   disabled={disabled}
                 />
                 {isSearching && (
@@ -262,7 +262,7 @@ export function TeamMemberSelector({
                 type="email"
                 value={manualEmail}
                 onChange={(e) => setManualEmail(e.target.value)}
-                placeholder="john@stu.ucsc.cmb.ac.lk"
+                placeholder="john@stu.ucsc.cmb.ac.lk or student@uom.lk"
                 disabled={disabled}
               />
             </div>

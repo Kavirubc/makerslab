@@ -73,10 +73,11 @@ export function UniversityRequestForm({ userEmail, onSuccess, onCancel }: Univer
       return false
     }
 
-    // Validate email domain format
-    if (!isValidAcademicEmail(`test@${formData.emailDomain}`)) {
-      setError('Email domain must end with .ac.lk')
-      showError('Email domain must end with .ac.lk')
+    // Validate email domain format (basic structure check)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(`test@${formData.emailDomain}`)) {
+      setError('Please enter a valid email domain format (e.g., ucsc.cmb.ac.lk or uom.lk)')
+      showError('Please enter a valid email domain format (e.g., ucsc.cmb.ac.lk or uom.lk)')
       return false
     }
 
@@ -106,7 +107,7 @@ export function UniversityRequestForm({ userEmail, onSuccess, onCancel }: Univer
           province: formData.province.trim(),
           emailDomain: formData.emailDomain.trim(),
           reason: formData.reason.trim() || null,
-          // Only send userEmail if it's a valid academic email (for tracking purposes)
+          // Only send userEmail if it's a valid email format (for tracking purposes)
           userEmail: (userEmail && isValidAcademicEmail(userEmail)) ? userEmail : null
         })
       })
@@ -203,14 +204,14 @@ export function UniversityRequestForm({ userEmail, onSuccess, onCancel }: Univer
               id="emailDomain"
               name="emailDomain"
               type="text"
-              placeholder="ucsc.cmb.ac.lk"
+              placeholder="ucsc.cmb.ac.lk or uom.lk"
               value={formData.emailDomain}
               onChange={handleChange}
               required
               disabled={isLoading}
             />
             <p className="text-xs text-muted-foreground">
-              Must end with .ac.lk (e.g., ucsc.cmb.ac.lk)
+              Enter the email domain (e.g., ucsc.cmb.ac.lk, uom.lk, pdn.ac.lk)
             </p>
           </div>
 

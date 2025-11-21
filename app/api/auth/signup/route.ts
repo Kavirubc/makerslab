@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/mongodb'
 import { User } from '@/lib/models/User'
 import bcrypt from 'bcryptjs'
-import { isValidAcademicEmail, getUniversityByEmailDomain } from '@/lib/utils/university'
+import { getUniversityByEmailDomain } from '@/lib/utils/university'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,19 +17,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate email ends with ac.lk
-    if (!isValidAcademicEmail(email)) {
-      return NextResponse.json(
-        { error: 'Only .ac.lk email addresses are allowed' },
-        { status: 400 }
-      )
-    }
-
-    // Get university by email domain
+    // Get university by email domain - this validates that the domain is registered
     const university = await getUniversityByEmailDomain(email)
     if (!university) {
       return NextResponse.json(
-        { error: 'University not found for this email domain. Please contact support.' },
+        { error: 'Your university email domain is not registered. Please contact support or request to add your university.' },
         { status: 400 }
       )
     }

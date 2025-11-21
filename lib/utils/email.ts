@@ -4,10 +4,16 @@
  */
 
 /**
- * Validates if email ends with ac.lk domain
+ * Basic email format validation (client-side only)
+ * This only checks if the email has a valid format (has @, valid domain structure)
+ * Full validation (checking if domain exists in database) must be done server-side
  */
 export function isValidAcademicEmail(email: string): boolean {
-  return email.toLowerCase().endsWith('.ac.lk')
+  if (!email || typeof email !== 'string') {
+    return false
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email.toLowerCase())
 }
 
 /**

@@ -347,7 +347,7 @@ export default function AdminUniversitiesPage() {
                 <Input
                   value={formData.emailDomain}
                   onChange={(e) => setFormData({ ...formData, emailDomain: e.target.value })}
-                  placeholder="ucsc.cmb.ac.lk"
+                  placeholder="ucsc.cmb.ac.lk or uom.lk"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">

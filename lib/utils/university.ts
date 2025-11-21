@@ -3,10 +3,34 @@ import { University } from '@/lib/models/University'
 import { ObjectId } from 'mongodb'
 
 /**
- * Validates if email ends with ac.lk domain
+ * Validates if email domain exists in the universities database
+ * This is the primary validation method - checks if the domain is registered
+ */
+export async function isValidAcademicEmailDomain(email: string): Promise<boolean> {
+  const university = await getUniversityByEmailDomain(email)
+  return university !== null
+}
+
+/**
+ * Basic email format validation (checks if it's a valid email structure)
+ * This is a simple format check, not a database lookup
+ * Use isValidAcademicEmailDomain() for actual domain validation
+ */
+export function isValidEmailFormat(email: string): boolean {
+  if (!email || typeof email !== 'string') {
+    return false
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email.toLowerCase())
+}
+
+/**
+ * @deprecated Use isValidAcademicEmailDomain() for database-based validation
+ * Kept for backward compatibility, but will be removed in future versions
  */
 export function isValidAcademicEmail(email: string): boolean {
-  return email.toLowerCase().endsWith('.ac.lk')
+  // Basic format check only - full validation requires database lookup
+  return isValidEmailFormat(email)
 }
 
 /**

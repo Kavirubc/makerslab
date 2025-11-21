@@ -7,7 +7,7 @@ export interface UniversityRequest {
   facultyName?: string | null // Faculty name (optional, for cases where different faculties have different email domains)
   district: string
   province: string
-  emailDomain: string // Email domain (e.g., "ucsc.cmb.ac.lk")
+  emailDomain: string // Email domain (e.g., "ucsc.cmb.ac.lk" or "uom.lk")
   status: 'pending' | 'approved' | 'rejected'
   reason?: string | null // Reason for request (optional)
   adminNotes?: string | null // Admin notes when approving/rejecting

@@ -70,7 +70,7 @@ export default async function Hero() {
                 maskType="lines"
               >
                 <p className="text-sm text-muted-foreground">
-                  Exclusively for students with .ac.lk university email
+                  Exclusively for students with registered university email
                   addresses
                 </p>
               </SplitTextComp>

@@ -42,10 +42,6 @@ export default function Register() {
         })
     }
 
-    const validateEmail = (email: string): boolean => {
-        return email.toLowerCase().endsWith('.ac.lk')
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
@@ -58,8 +54,10 @@ export default function Register() {
             return
         }
 
-        if (!validateEmail(formData.email)) {
-            const errorMessage = 'Email must end with .ac.lk (e.g., 2022is031@ucsc.cmb.ac.lk)'
+        // Basic email format validation (server will check if domain is registered)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(formData.email)) {
+            const errorMessage = 'Please enter a valid email address'
             setError(errorMessage)
             showError(errorMessage)
             return
@@ -102,7 +100,7 @@ export default function Register() {
                 const errorMessage = data.error || 'An error occurred during registration'
 
                 // Check if error is due to university not found
-                if (errorMessage.includes('University not found') || errorMessage.includes('university not found')) {
+                if (errorMessage.includes('university') && (errorMessage.includes('not registered') || errorMessage.includes('not found'))) {
                     // Show university request dialog
                     setShowUniversityRequestDialog(true)
                     info('Your university is not yet supported. Please request to add it below.')
@@ -133,7 +131,7 @@ export default function Register() {
                         <CardHeader className="space-y-2 pb-6">
                             <CardTitle className="text-3xl font-bold">Create an account</CardTitle>
                             <CardDescription className="text-base">
-                                Enter your details to register. Only .ac.lk emails are accepted.
+                                Enter your details to register. Use your university email address.
                             </CardDescription>
                         </CardHeader>
                         <form onSubmit={handleSubmit}>
@@ -164,7 +162,7 @@ export default function Register() {
                                         id="email"
                                         name="email"
                                         type="email"
-                                        placeholder="2022is031@ucsc.cmb.ac.lk"
+                                        placeholder="2022is031@ucsc.cmb.ac.lk or student@uom.lk"
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
@@ -173,7 +171,7 @@ export default function Register() {
                                     />
                                     <div className="flex items-center justify-between">
                                         <p className="text-xs text-muted-foreground">
-                                            Must end with .ac.lk
+                                            Use your registered university email
                                         </p>
                                         <button
                                             type="button"
@@ -298,7 +296,7 @@ export default function Register() {
                         </DialogDescription>
                     </DialogHeader>
                     <UniversityRequestForm
-                        userEmail={formData.email && formData.email.toLowerCase().endsWith('.ac.lk') ? formData.email : undefined}
+                        userEmail={formData.email || undefined}
                         onSuccess={() => {
                             setShowUniversityRequestDialog(false)
                             info('Your request has been submitted. Please wait for admin approval before signing up.')

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/mongodb'
 import { UniversityRequest } from '@/lib/models/UniversityRequest'
 import { University } from '@/lib/models/University'
-import { isValidAcademicEmail, extractEmailDomain } from '@/lib/utils/university'
+import { isValidEmailFormat, extractEmailDomain } from '@/lib/utils/university'
 
 // POST /api/universities/request - Create university request (public, no auth required)
 export async function POST(request: NextRequest) {
@@ -18,17 +18,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate email domain format
-    if (!isValidAcademicEmail(`test@${emailDomain}`)) {
+    // Validate email domain format (basic structure check)
+    if (!isValidEmailFormat(`test@${emailDomain}`)) {
       return NextResponse.json(
-        { error: 'Email domain must end with .ac.lk' },
+        { error: 'Please enter a valid email domain format (e.g., ucsc.cmb.ac.lk or uom.lk)' },
         { status: 400 }
       )
     }
 
     // Validate userEmail if provided (for tracking purposes)
     // If invalid, just ignore it since it's optional and only for tracking
-    const validUserEmail = userEmail && isValidAcademicEmail(userEmail) ? userEmail : null
+    const validUserEmail = userEmail && isValidEmailFormat(userEmail) ? userEmail : null
 
     const db = await getDatabase()
 

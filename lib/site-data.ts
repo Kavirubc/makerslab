@@ -11,7 +11,7 @@ export const FeaturesData: FeatureItemProps[] = [
   {
     title: "The Trusted Signal: Get Noticed By Verified Recruiters.",
     description:
-      "Generate a secure, personalized portfolio link you can share immediately. Recruiters recognize and trust the .ac.lk verification system. Your unique portfolio is designed for seamless, one-click access to your contact information and follow-up details.",
+      "Generate a secure, personalized portfolio link you can share immediately. Recruiters recognize and trust the university email verification system. Your unique portfolio is designed for seamless, one-click access to your contact information and follow-up details.",
     imgSrc: "",
     imgAlt: "",
   },

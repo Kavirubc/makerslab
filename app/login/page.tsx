@@ -34,6 +34,16 @@ function LoginForm() {
         setError('')
         setIsLoading(true)
 
+        // Basic email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            const errorMessage = 'Please enter a valid email address'
+            setError(errorMessage)
+            showError(errorMessage)
+            setIsLoading(false)
+            return
+        }
+
         try {
             const result = await signIn('credentials', {
                 email,
@@ -42,7 +52,23 @@ function LoginForm() {
             })
 
             if (result?.error) {
-                const errorMessage = 'Invalid email or password'
+                // NextAuth v5 converts errors to "CredentialsSignin"
+                // The actual error message is logged server-side but not passed to client
+                // We show a generic message, but the server logs will show the actual error
+                let errorMessage = 'Invalid email or password'
+                
+                // Check if error contains any specific information
+                if (typeof result.error === 'string' && result.error !== 'CredentialsSignin') {
+                    // If NextAuth passes the message through, use it
+                    if (result.error.includes('university') || result.error.includes('not registered')) {
+                        errorMessage = 'Your university email domain is not registered. Please contact support or request to add your university.'
+                    } else if (result.error.includes('banned')) {
+                        errorMessage = 'Your account has been banned. Please contact support.'
+                    } else {
+                        errorMessage = result.error
+                    }
+                }
+                
                 setError(errorMessage)
                 showError(errorMessage)
             } else if (result?.ok) {
@@ -50,8 +76,9 @@ function LoginForm() {
                 router.push('/dashboard')
                 router.refresh()
             }
-        } catch (error) {
-            const errorMessage = 'An error occurred. Please try again.'
+        } catch (error: any) {
+            // Handle any unexpected errors
+            const errorMessage = error?.message || 'An error occurred. Please try again.'
             setError(errorMessage)
             showError(errorMessage)
         } finally {
@@ -79,11 +106,11 @@ function LoginForm() {
                                     </div>
                                 )}
                                 <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-sm font-medium">Email (must end with .ac.lk)</Label>
+                                    <Label htmlFor="email" className="text-sm font-medium">University Email</Label>
                                     <Input
                                         id="email"
                                         type="email"
-                                        placeholder="2022is031@ucsc.cmb.ac.lk"
+                                        placeholder="2022is031@ucsc.cmb.ac.lk or student@uom.lk"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
