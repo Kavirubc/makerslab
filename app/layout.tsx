@@ -17,10 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Showcase LK",
+  title: "MakersLab",
   description:
     "A platform for university students to share and collaborate on projects",
-  icons: [{ rel: "icon", url: "/showcase/ShowcaseLogo500x500.png" }],
 };
 
 export default function RootLayout({
