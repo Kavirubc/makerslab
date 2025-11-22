@@ -19,7 +19,7 @@ export async function Navbar() {
           <Link href="/" className="flex items-center space-x-2">
             <Image
               src="/showcase/ShowcaseLogo500x200.png"
-              alt="Showcase.lk logo"
+              alt="MakersLab logo"
               width={120}
               height={40}
               priority
