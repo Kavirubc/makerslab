@@ -34,6 +34,10 @@ export interface Project {
   // Visibility
   isPublic: boolean
 
+  // Draft mode
+  isDraft?: boolean // true = draft, false/undefined = published
+  lastAutoSavedAt?: Date // timestamp for auto-save tracking
+
   // Engagement
   views: number
   likes: number

@@ -100,6 +100,82 @@ export async function PUT(
   }
 }
 
+// PATCH /api/projects/[id] - Auto-save partial update for drafts
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id } = await params
+
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 })
+    }
+
+    const db = await getDatabase()
+    const project = await db.collection<Project>('projects').findOne({
+      _id: new ObjectId(id)
+    })
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+    }
+
+    // check ownership
+    if (project.userId.toString() !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const body = await request.json()
+    const now = new Date()
+
+    // build update object with only provided fields
+    const updateFields: Record<string, unknown> = {
+      updatedAt: now,
+      lastAutoSavedAt: now,
+    }
+
+    // allowed fields for auto-save
+    const allowedFields = [
+      'title', 'description', 'category', 'tags',
+      'thumbnailUrl', 'slidesDeckUrl', 'pitchVideoUrl', 'demoUrl', 'githubUrl',
+      'teamMembers', 'status', 'isDraft'
+    ]
+
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateFields[field] = body[field]
+      }
+    }
+
+    // handle date fields
+    if (body.startDate) updateFields.startDate = new Date(body.startDate)
+    if (body.endDate) updateFields.endDate = new Date(body.endDate)
+
+    await db.collection<Project>('projects').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateFields }
+    )
+
+    return NextResponse.json({
+      message: 'Draft saved',
+      projectId: id,
+      lastAutoSavedAt: now.toISOString()
+    })
+  } catch (error) {
+    console.error('Error auto-saving project:', error)
+    return NextResponse.json(
+      { error: 'Failed to save draft' },
+      { status: 500 }
+    )
+  }
+}
+
 // DELETE /api/projects/[id] - Delete a project
 export async function DELETE(
   request: NextRequest,

@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Edit, Trash2, Eye, ExternalLink, Github, Heart } from 'lucide-react'
+import { Edit, Trash2, Eye, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { Project } from '@/lib/models/Project'
 import { ProjectCardSkeleton } from '@/components/ui/project-card-skeleton'
+import { DraftBadge } from './draft-badge'
 
 interface ProjectsListProps {
   userId: string
@@ -93,9 +94,13 @@ export function ProjectsList({ userId }: ProjectsListProps) {
           )}
           <CardHeader>
             <div className="flex justify-between items-start mb-2">
-              <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
-                {project.status}
-              </Badge>
+              {project.isDraft ? (
+                <DraftBadge />
+              ) : (
+                <Badge variant={project.status === 'completed' ? 'default' : 'secondary'}>
+                  {project.status}
+                </Badge>
+              )}
               <Badge variant="outline">{project.category}</Badge>
             </div>
             <CardTitle className="line-clamp-1">{project.title}</CardTitle>
@@ -131,17 +136,37 @@ export function ProjectsList({ userId }: ProjectsListProps) {
             </div>
           </CardContent>
           <CardFooter className="flex gap-2">
-            <Link href={`/projects/${project._id}`} className="flex-1">
-              <Button variant="outline" size="sm" className="w-full">
-                <Eye className="h-4 w-4 mr-2" />
-                View
-              </Button>
-            </Link>
-            <Link href={`/projects/${project._id}/edit`}>
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4" />
-              </Button>
-            </Link>
+            {project.isDraft ? (
+              // draft project actions
+              <>
+                <Link href={`/projects/${project._id}/edit`} className="flex-1">
+                  <Button variant="default" size="sm" className="w-full">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Continue Editing
+                  </Button>
+                </Link>
+                <Link href={`/projects/${project._id}/preview`}>
+                  <Button variant="outline" size="sm">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              // published project actions
+              <>
+                <Link href={`/projects/${project._id}`} className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View
+                  </Button>
+                </Link>
+                <Link href={`/projects/${project._id}/edit`}>
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </>
+            )}
             <Button
               variant="outline"
               size="sm"

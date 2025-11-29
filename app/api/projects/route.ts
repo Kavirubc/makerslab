@@ -12,10 +12,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const draftsOnly = searchParams.get('draftsOnly') === 'true'
+
     const db = await getDatabase()
+
+    // build query based on params
+    const query: Record<string, unknown> = { userId: new ObjectId(session.user.id) }
+    if (draftsOnly) {
+      query.isDraft = true
+    }
+
     const projects = await db
       .collection<Project>('projects')
-      .find({ userId: new ObjectId(session.user.id) })
+      .find(query)
       .sort({ updatedAt: -1 })
       .toArray()
 
@@ -52,7 +62,8 @@ export async function POST(request: NextRequest) {
       startDate,
       endDate,
       status,
-      isPublic
+      isPublic,
+      isDraft
     } = body
 
     // Validation
@@ -64,6 +75,11 @@ export async function POST(request: NextRequest) {
     }
 
     const db = await getDatabase()
+    const now = new Date()
+
+    // drafts are always private until published
+    const projectIsPublic = isDraft ? false : isPublic !== false
+
     const newProject: Omit<Project, '_id'> = {
       userId: new ObjectId(session.user.id),
       title,
@@ -79,11 +95,13 @@ export async function POST(request: NextRequest) {
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       status: status || 'completed',
-      isPublic: isPublic !== false, // Default to public
+      isPublic: projectIsPublic,
+      isDraft: isDraft || false,
+      lastAutoSavedAt: isDraft ? now : undefined,
       views: 0,
       likes: 0,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: now,
+      updatedAt: now
     }
 
     const result = await db.collection<Project>('projects').insertOne(newProject as Project)

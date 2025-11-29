@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
     const skip = parseInt(searchParams.get('skip') || '0')
 
     const db = await getDatabase()
-    const query: any = { isPublic: true }
+    // exclude drafts from public explore
+    const query: any = { isPublic: true, isDraft: { $ne: true } }
 
     if (category && category !== 'all') {
       query.category = category

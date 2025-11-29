@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,14 +8,17 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { X, Upload, Loader2 } from 'lucide-react'
+import { X, Upload, Loader2, Save, Send } from 'lucide-react'
 import { TeamMemberSelector } from './team-member-selector'
 import { MarkdownEditor } from './markdown-editor'
+import { AutoSaveStatus } from './auto-save-status'
+import { DraftBadge } from './draft-badge'
 import {
   uploadFile,
   validateImageFile,
 } from '@/lib/firebase-client'
 import { useNotification } from '@/lib/hooks/use-notification'
+import { useAutoSave } from '@/lib/hooks/use-auto-save'
 
 const CATEGORIES = [
   'Web Development',
@@ -49,6 +52,9 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
   const [uploadProgress, setUploadProgress] = useState('')
   const { success, error: showError } = useNotification()
 
+  // Draft state
+  const [isDraft, setIsDraft] = useState(project.isDraft || false)
+
   // Form state
   const [title, setTitle] = useState(project.title || '')
   const [description, setDescription] = useState(project.description || '')
@@ -60,6 +66,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     project.thumbnailUrl || null
   )
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>(project.thumbnailUrl || undefined)
 
   const [slidesDeckUrl, setSlidesDeckUrl] = useState(project.slidesDeckUrl || '')
   const [pitchVideoUrl, setPitchVideoUrl] = useState(project.pitchVideoUrl || '')
@@ -70,6 +77,33 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
 
   const [status, setStatus] = useState<'completed' | 'in-progress'>(project.status || 'completed')
   const [isPublic, setIsPublic] = useState(project.isPublic !== false)
+
+  // memoized form data for auto-save
+  const formData = useMemo(() => ({
+    title,
+    description,
+    category,
+    tags,
+    thumbnailUrl,
+    slidesDeckUrl: slidesDeckUrl || undefined,
+    pitchVideoUrl: pitchVideoUrl || undefined,
+    demoUrl: demoUrl || undefined,
+    githubUrl: githubUrl || undefined,
+    teamMembers,
+    status,
+  }), [title, description, category, tags, thumbnailUrl, slidesDeckUrl, pitchVideoUrl, demoUrl, githubUrl, teamMembers, status])
+
+  // auto-save hook (only enabled when editing a draft)
+  const {
+    status: autoSaveStatus,
+    lastSavedAt,
+    save: manualSave,
+    error: autoSaveError,
+  } = useAutoSave({
+    projectId: project._id,
+    data: formData,
+    enabled: isDraft && !!title && !!description && !!category,
+  })
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -100,21 +134,118 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
     setError('')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // upload thumbnail helper
+  const uploadThumbnailIfNeeded = useCallback(async (): Promise<string | undefined> => {
+    if (!thumbnail) return thumbnailUrl
+
+    setUploadProgress('Uploading thumbnail...')
+    const fileName = `project_${Date.now()}.${thumbnail.name.split('.').pop()}`
+    const uploadedUrl = await uploadFile(thumbnail, 'project-thumbnails', fileName)
+    setThumbnailUrl(uploadedUrl)
+    setThumbnail(null)
+    return uploadedUrl
+  }, [thumbnail, thumbnailUrl])
+
+  // save draft (for draft projects)
+  const handleSaveDraft = async () => {
+    setError('')
+    setIsLoading(true)
+
+    try {
+      const uploadedThumbnailUrl = await uploadThumbnailIfNeeded()
+      setUploadProgress('Saving draft...')
+
+      const response = await fetch(`/api/projects/${project._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          category,
+          tags,
+          thumbnailUrl: uploadedThumbnailUrl,
+          slidesDeckUrl: slidesDeckUrl || undefined,
+          pitchVideoUrl: pitchVideoUrl || undefined,
+          demoUrl: demoUrl || undefined,
+          githubUrl: githubUrl || undefined,
+          teamMembers,
+          status,
+          isDraft: true,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to save draft')
+      }
+
+      success('Draft saved!')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save draft'
+      setError(errorMessage)
+      showError(errorMessage)
+    } finally {
+      setIsLoading(false)
+      setUploadProgress('')
+    }
+  }
+
+  // publish draft
+  const handlePublish = async () => {
+    setError('')
+    setIsLoading(true)
+
+    try {
+      const uploadedThumbnailUrl = await uploadThumbnailIfNeeded()
+      setUploadProgress('Publishing project...')
+
+      const response = await fetch(`/api/projects/${project._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          category,
+          tags,
+          thumbnailUrl: uploadedThumbnailUrl,
+          slidesDeckUrl: slidesDeckUrl || undefined,
+          pitchVideoUrl: pitchVideoUrl || undefined,
+          demoUrl: demoUrl || undefined,
+          githubUrl: githubUrl || undefined,
+          teamMembers,
+          status,
+          isPublic,
+          isDraft: false,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to publish project')
+      }
+
+      setIsDraft(false)
+      success('Project published successfully!')
+      router.push(`/projects/${project._id}`)
+      router.refresh()
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to publish project'
+      setError(errorMessage)
+      showError(errorMessage)
+    } finally {
+      setIsLoading(false)
+      setUploadProgress('')
+    }
+  }
+
+  // update published project
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
 
     try {
-      let thumbnailUrl = project.thumbnailUrl
-
-      // Upload thumbnail if changed
-      if (thumbnail) {
-        setUploadProgress('Uploading thumbnail...')
-        const fileName = `project_${Date.now()}.${thumbnail.name.split('.').pop()}`
-        thumbnailUrl = await uploadFile(thumbnail, 'project-thumbnails', fileName)
-      }
-
+      const uploadedThumbnailUrl = await uploadThumbnailIfNeeded()
       setUploadProgress('Updating project...')
 
       const response = await fetch(`/api/projects/${project._id}`, {
@@ -125,15 +256,16 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
           description,
           category,
           tags,
-          thumbnailUrl: thumbnailUrl || undefined,
+          thumbnailUrl: uploadedThumbnailUrl,
           slidesDeckUrl: slidesDeckUrl || undefined,
           pitchVideoUrl: pitchVideoUrl || undefined,
           demoUrl: demoUrl || undefined,
           githubUrl: githubUrl || undefined,
           teamMembers,
           status,
-          isPublic
-        })
+          isPublic,
+          isDraft: false,
+        }),
       })
 
       if (!response.ok) {
@@ -144,8 +276,8 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
       success('Project updated successfully!')
       router.push(`/projects/${project._id}`)
       router.refresh()
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update project'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update project'
       setError(errorMessage)
       showError(errorMessage)
     } finally {
@@ -155,8 +287,26 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-      {/* Inline error for form validation - toast for API errors */}
+    <form onSubmit={handleUpdate} className="space-y-6 max-w-3xl">
+      {/* Header with draft status and auto-save indicator */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {isDraft && <DraftBadge />}
+          <h2 className="text-lg font-semibold">
+            {isDraft ? 'Edit Draft' : 'Edit Project'}
+          </h2>
+        </div>
+        {isDraft && (
+          <AutoSaveStatus
+            status={autoSaveStatus}
+            lastSavedAt={lastSavedAt}
+            error={autoSaveError}
+            onRetry={manualSave}
+          />
+        )}
+      </div>
+
+      {/* Inline error for form validation */}
       {error && (
         <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md">
           {error}
@@ -364,9 +514,32 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
       </Card>
 
       <div className="flex gap-4">
-        <Button type="submit" disabled={isLoading} className="flex-1">
-          {isLoading ? 'Updating...' : 'Update Project'}
-        </Button>
+        {isDraft ? (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSaveDraft}
+              disabled={isLoading}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isLoading ? 'Saving...' : 'Save Draft'}
+            </Button>
+            <Button
+              type="button"
+              onClick={handlePublish}
+              disabled={isLoading || !title || !description || !category}
+              className="flex-1"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {isLoading ? 'Publishing...' : 'Publish'}
+            </Button>
+          </>
+        ) : (
+          <Button type="submit" disabled={isLoading} className="flex-1">
+            {isLoading ? 'Updating...' : 'Update Project'}
+          </Button>
+        )}
         <Button
           type="button"
           variant="outline"

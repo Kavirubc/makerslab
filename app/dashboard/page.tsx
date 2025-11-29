@@ -31,6 +31,7 @@ import { ProjectCreationChart } from "@/components/user/charts/project-creation-
 import { UserCategoryChart } from "@/components/user/charts/user-category-chart";
 import { UserEngagementChart } from "@/components/user/charts/user-engagement-chart";
 import { getUserAnalyticsData } from "@/lib/utils/user-analytics";
+import { DashboardDrafts } from "@/components/dashboard-drafts";
 
 export default async function Dashboard() {
   const session = await auth();
@@ -164,6 +165,9 @@ export default async function Dashboard() {
           userId={session.user.id}
           portfolioUrl={portfolioUrl}
         />
+
+        {/* Drafts Section */}
+        <DashboardDrafts />
 
         {/* Enhanced Stats Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
