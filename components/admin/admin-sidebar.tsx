@@ -13,6 +13,7 @@ import {
   Flag,
   Menu,
   X,
+  BookOpen,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,7 @@ const navigation = [
   { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
   { name: 'Reports', href: '/admin/reports', icon: Flag },
   { name: 'Universities', href: '/admin/universities', icon: Building2 },
+  { name: 'Courses', href: '/admin/courses', icon: BookOpen },
 ]
 
 export function AdminSidebar() {

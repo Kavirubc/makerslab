@@ -5,12 +5,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Eye, ExternalLink, Github, FileText, Video, Heart } from 'lucide-react'
+import { Eye, ExternalLink, Github, FileText, Video, Heart, Filter, X } from 'lucide-react'
 import Link from 'next/link'
 import { Project } from '@/lib/models/Project'
 import { ProjectCardSkeleton } from '@/components/ui/project-card-skeleton'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  generateAcademicPeriods,
+  TEAM_SIZE_OPTIONS,
+  ACADEMIC_TYPE_OPTIONS,
+} from '@/lib/constants/courses'
 
 const CATEGORIES = [
   'All',
@@ -33,9 +39,16 @@ export function ExploreProjects() {
   const [category, setCategory] = useState('All')
   const [hasMore, setHasMore] = useState(false)
 
+  // Course/academic filter state
+  const [showFilters, setShowFilters] = useState(false)
+  const [courseCode, setCourseCode] = useState('')
+  const [academicPeriod, setAcademicPeriod] = useState('')
+  const [teamSize, setTeamSize] = useState('')
+  const [academicType, setAcademicType] = useState('')
+
   useEffect(() => {
     fetchProjects()
-  }, [category])
+  }, [category, courseCode, academicPeriod, teamSize, academicType])
 
   const fetchProjects = async () => {
     setIsLoading(true)
@@ -43,6 +56,11 @@ export function ExploreProjects() {
       const params = new URLSearchParams()
       if (category !== 'All') params.append('category', category)
       if (search) params.append('search', search)
+      // Course/academic filters
+      if (courseCode) params.append('courseCode', courseCode)
+      if (academicPeriod) params.append('academicPeriod', academicPeriod)
+      if (teamSize) params.append('teamSize', teamSize)
+      if (academicType) params.append('academicType', academicType)
 
       const response = await fetch(`/api/projects/explore?${params}`)
       const data = await response.json()
@@ -53,6 +71,17 @@ export function ExploreProjects() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Check if any filters are active
+  const hasActiveFilters = courseCode || academicPeriod || teamSize || academicType
+
+  // Clear all course/academic filters
+  const clearFilters = () => {
+    setCourseCode('')
+    setAcademicPeriod('')
+    setTeamSize('')
+    setAcademicType('')
   }
 
   const handleSearch = (e: React.FormEvent) => {
@@ -106,7 +135,111 @@ export function ExploreProjects() {
             ))}
           </SelectContent>
         </Select>
+
+        {/* Filter toggle button */}
+        <Button
+          type="button"
+          variant={showFilters ? 'default' : 'outline'}
+          onClick={() => setShowFilters(!showFilters)}
+          className="gap-2"
+        >
+          <Filter className="h-4 w-4" />
+          Filters
+          {hasActiveFilters && (
+            <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+              !
+            </Badge>
+          )}
+        </Button>
       </div>
+
+      {/* Course/Academic Filters Panel */}
+      {showFilters && (
+        <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium">Academic Filters</h3>
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="h-8 text-xs"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Clear filters
+              </Button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Course Code Filter */}
+            <div className="space-y-2">
+              <Label className="text-sm">Course Code</Label>
+              <Input
+                value={courseCode}
+                onChange={(e) => setCourseCode(e.target.value)}
+                placeholder="e.g., SCS2201"
+                className="h-9"
+              />
+            </div>
+
+            {/* Academic Period Filter */}
+            <div className="space-y-2">
+              <Label className="text-sm">Academic Period</Label>
+              <Select value={academicPeriod} onValueChange={setAcademicPeriod}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="All periods" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All periods</SelectItem>
+                  {generateAcademicPeriods(5).map((period) => (
+                    <SelectItem key={period} value={period}>
+                      {period}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Team Size Filter */}
+            <div className="space-y-2">
+              <Label className="text-sm">Team Size</Label>
+              <Select value={teamSize} onValueChange={setTeamSize}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="All sizes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All sizes</SelectItem>
+                  {TEAM_SIZE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Academic Type Filter */}
+            <div className="space-y-2">
+              <Label className="text-sm">Academic Type</Label>
+              <Select value={academicType} onValueChange={setAcademicType}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="All types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All types</SelectItem>
+                  {ACADEMIC_TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      )}
 
       {projects.length === 0 ? (
         <Card className="text-center py-12">
@@ -156,6 +289,22 @@ export function ExploreProjects() {
                     </Badge>
                   )}
                 </div>
+
+                {/* Course/Academic info badges */}
+                {(project.courseCode || project.academicPeriod) && (
+                  <div className="flex flex-wrap gap-1">
+                    {project.courseCode && (
+                      <Badge variant="outline" className="text-xs">
+                        {project.courseCode}
+                      </Badge>
+                    )}
+                    {project.academicPeriod && (
+                      <Badge variant="outline" className="text-xs">
+                        {project.academicPeriod}
+                      </Badge>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex gap-2 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">

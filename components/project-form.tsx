@@ -11,6 +11,12 @@ import { Badge } from '@/components/ui/badge'
 import { X, Upload, Loader2, Save, Send } from 'lucide-react'
 import { TeamMemberSelector } from './team-member-selector'
 import { MarkdownEditor } from './markdown-editor'
+import { CourseCodeSelector } from './course-code-selector'
+import {
+  generateAcademicPeriods,
+  TEAM_SIZE_OPTIONS,
+  ACADEMIC_TYPE_OPTIONS,
+} from '@/lib/constants/courses'
 import { AutoSaveStatus } from './auto-save-status'
 import { DraftBadge } from './draft-badge'
 import {
@@ -73,6 +79,12 @@ export function ProjectForm() {
   const [status, setStatus] = useState<'completed' | 'in-progress'>('completed')
   const [isPublic, setIsPublic] = useState(true)
 
+  // Course/Module tagging state (optional academic context)
+  const [courseCode, setCourseCode] = useState('')
+  const [academicPeriod, setAcademicPeriod] = useState('')
+  const [teamSize, setTeamSize] = useState<'individual' | 'group' | ''>('')
+  const [academicType, setAcademicType] = useState('')
+
   // memoized form data for auto-save
   const formData = useMemo(() => ({
     title,
@@ -86,7 +98,11 @@ export function ProjectForm() {
     githubUrl: githubUrl || undefined,
     teamMembers,
     status,
-  }), [title, description, category, tags, thumbnailUrl, slidesDeckUrl, pitchVideoUrl, demoUrl, githubUrl, teamMembers, status])
+    courseCode: courseCode || undefined,
+    academicPeriod: academicPeriod || undefined,
+    teamSize: teamSize || undefined,
+    academicType: academicType || undefined,
+  }), [title, description, category, tags, thumbnailUrl, slidesDeckUrl, pitchVideoUrl, demoUrl, githubUrl, teamMembers, status, courseCode, academicPeriod, teamSize, academicType])
 
   // auto-save hook (only enabled when we have a draft projectId)
   const {
@@ -166,6 +182,10 @@ export function ProjectForm() {
         teamMembers,
         status,
         isDraft: true,
+        courseCode: courseCode || undefined,
+        academicPeriod: academicPeriod || undefined,
+        teamSize: teamSize || undefined,
+        academicType: academicType || undefined,
       }
 
       let response: Response
@@ -231,6 +251,10 @@ export function ProjectForm() {
         status,
         isPublic,
         isDraft: false,
+        courseCode: courseCode || undefined,
+        academicPeriod: academicPeriod || undefined,
+        teamSize: teamSize || undefined,
+        academicType: academicType || undefined,
       }
 
       let response: Response
@@ -413,14 +437,156 @@ export function ProjectForm() {
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
               {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                <Badge key={tag} variant="secondary" className="flex items-center gap-1 pr-1">
                   {tag}
-                  <X
-                    className="h-3 w-3 cursor-pointer"
+                  <button
+                    type="button"
                     onClick={() => handleRemoveTag(tag)}
-                  />
+                    disabled={isLoading}
+                    className="ml-1 rounded-full hover:bg-muted p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Course/Module Information - Optional academic context */}
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Course Information (Optional)</h3>
+              <p className="text-sm text-muted-foreground">
+                Add academic context to help others discover related projects
+              </p>
+            </div>
+            {(courseCode || academicPeriod || teamSize || academicType) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCourseCode('')
+                  setAcademicPeriod('')
+                  setTeamSize('')
+                  setAcademicType('')
+                }}
+                disabled={isLoading}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          {/* Course Code with Autocomplete */}
+          <CourseCodeSelector
+            value={courseCode}
+            onChange={setCourseCode}
+            disabled={isLoading}
+          />
+
+          {/* Academic Period */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="academicPeriod">Academic Period</Label>
+              {academicPeriod && (
+                <button
+                  type="button"
+                  onClick={() => setAcademicPeriod('')}
+                  disabled={isLoading}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <Select
+              value={academicPeriod}
+              onValueChange={setAcademicPeriod}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select academic period" />
+              </SelectTrigger>
+              <SelectContent>
+                {generateAcademicPeriods(5).map((period) => (
+                  <SelectItem key={period} value={period}>
+                    {period}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Team Size and Academic Type Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="teamSize">Team Size</Label>
+                {teamSize && (
+                  <button
+                    type="button"
+                    onClick={() => setTeamSize('')}
+                    disabled={isLoading}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <Select
+                value={teamSize}
+                onValueChange={(v) => setTeamSize(v as 'individual' | 'group')}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEAM_SIZE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="academicType">Academic Type</Label>
+                {academicType && (
+                  <button
+                    type="button"
+                    onClick={() => setAcademicType('')}
+                    disabled={isLoading}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <Select
+                value={academicType}
+                onValueChange={setAcademicType}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACADEMIC_TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

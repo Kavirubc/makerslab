@@ -63,7 +63,11 @@ export async function POST(request: NextRequest) {
       endDate,
       status,
       isPublic,
-      isDraft
+      isDraft,
+      courseCode,
+      academicPeriod,
+      teamSize,
+      academicType,
     } = body
 
     // Validation
@@ -96,6 +100,10 @@ export async function POST(request: NextRequest) {
       endDate: endDate ? new Date(endDate) : undefined,
       status: status || 'completed',
       isPublic: projectIsPublic,
+      courseCode: courseCode || undefined,
+      academicPeriod: academicPeriod || undefined,
+      teamSize: teamSize || undefined,
+      academicType: academicType || undefined,
       isDraft: isDraft || false,
       lastAutoSavedAt: isDraft ? now : undefined,
       views: 0,
