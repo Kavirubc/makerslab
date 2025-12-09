@@ -11,6 +11,12 @@ import { Badge } from '@/components/ui/badge'
 import { X, Upload, Loader2, Save, Send } from 'lucide-react'
 import { TeamMemberSelector } from './team-member-selector'
 import { MarkdownEditor } from './markdown-editor'
+import { CourseCodeSelector } from './course-code-selector'
+import {
+  generateAcademicPeriods,
+  TEAM_SIZE_OPTIONS,
+  ACADEMIC_TYPE_OPTIONS,
+} from '@/lib/constants/courses'
 import { AutoSaveStatus } from './auto-save-status'
 import { DraftBadge } from './draft-badge'
 import {
@@ -73,6 +79,12 @@ export function ProjectForm() {
   const [status, setStatus] = useState<'completed' | 'in-progress'>('completed')
   const [isPublic, setIsPublic] = useState(true)
 
+  // Course/Module tagging state (optional academic context)
+  const [courseCode, setCourseCode] = useState('')
+  const [academicPeriod, setAcademicPeriod] = useState('')
+  const [teamSize, setTeamSize] = useState<'individual' | 'group' | ''>('')
+  const [academicType, setAcademicType] = useState('')
+
   // memoized form data for auto-save
   const formData = useMemo(() => ({
     title,
@@ -86,7 +98,11 @@ export function ProjectForm() {
     githubUrl: githubUrl || undefined,
     teamMembers,
     status,
-  }), [title, description, category, tags, thumbnailUrl, slidesDeckUrl, pitchVideoUrl, demoUrl, githubUrl, teamMembers, status])
+    courseCode: courseCode || undefined,
+    academicPeriod: academicPeriod || undefined,
+    teamSize: teamSize || undefined,
+    academicType: academicType || undefined,
+  }), [title, description, category, tags, thumbnailUrl, slidesDeckUrl, pitchVideoUrl, demoUrl, githubUrl, teamMembers, status, courseCode, academicPeriod, teamSize, academicType])
 
   // auto-save hook (only enabled when we have a draft projectId)
   const {
@@ -166,6 +182,10 @@ export function ProjectForm() {
         teamMembers,
         status,
         isDraft: true,
+        courseCode: courseCode || undefined,
+        academicPeriod: academicPeriod || undefined,
+        teamSize: teamSize || undefined,
+        academicType: academicType || undefined,
       }
 
       let response: Response
@@ -231,6 +251,10 @@ export function ProjectForm() {
         status,
         isPublic,
         isDraft: false,
+        courseCode: courseCode || undefined,
+        academicPeriod: academicPeriod || undefined,
+        teamSize: teamSize || undefined,
+        academicType: academicType || undefined,
       }
 
       let response: Response
@@ -421,6 +445,87 @@ export function ProjectForm() {
                   />
                 </Badge>
               ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Course/Module Information - Optional academic context */}
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <h3 className="font-semibold">Course Information (Optional)</h3>
+          <p className="text-sm text-muted-foreground">
+            Add academic context to help others discover related projects
+          </p>
+
+          {/* Course Code with Autocomplete */}
+          <CourseCodeSelector
+            value={courseCode}
+            onChange={setCourseCode}
+            disabled={isLoading}
+          />
+
+          {/* Academic Period */}
+          <div className="space-y-2">
+            <Label htmlFor="academicPeriod">Academic Period</Label>
+            <Select
+              value={academicPeriod}
+              onValueChange={setAcademicPeriod}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select academic period" />
+              </SelectTrigger>
+              <SelectContent>
+                {generateAcademicPeriods(5).map((period) => (
+                  <SelectItem key={period} value={period}>
+                    {period}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Team Size and Academic Type Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="teamSize">Team Size</Label>
+              <Select
+                value={teamSize}
+                onValueChange={(v) => setTeamSize(v as 'individual' | 'group')}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEAM_SIZE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="academicType">Academic Type</Label>
+              <Select
+                value={academicType}
+                onValueChange={setAcademicType}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACADEMIC_TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

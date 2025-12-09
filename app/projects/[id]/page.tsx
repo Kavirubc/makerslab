@@ -320,6 +320,58 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               </div>
 
+              {/* Academic Information - only show if any field is set */}
+              {(project.courseCode ||
+                project.academicPeriod ||
+                project.teamSize ||
+                project.academicType) && (
+                <div className="border rounded-lg p-6">
+                  <h2 className="text-2xl font-bold mb-4">Academic Info</h2>
+                  <div className="space-y-3">
+                    {project.courseCode && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Course Code
+                        </p>
+                        <p className="text-sm font-medium">
+                          {project.courseCode}
+                        </p>
+                      </div>
+                    )}
+                    {project.academicPeriod && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Academic Period
+                        </p>
+                        <p className="text-sm font-medium">
+                          {project.academicPeriod}
+                        </p>
+                      </div>
+                    )}
+                    {project.teamSize && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Team Size
+                        </p>
+                        <p className="text-sm font-medium capitalize">
+                          {project.teamSize}
+                        </p>
+                      </div>
+                    )}
+                    {project.academicType && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Project Type
+                        </p>
+                        <p className="text-sm font-medium capitalize">
+                          {project.academicType}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Project Info */}
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-bold mb-4">Project Info</h2>

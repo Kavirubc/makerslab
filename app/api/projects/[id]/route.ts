@@ -144,7 +144,8 @@ export async function PATCH(
     const allowedFields = [
       'title', 'description', 'category', 'tags',
       'thumbnailUrl', 'slidesDeckUrl', 'pitchVideoUrl', 'demoUrl', 'githubUrl',
-      'teamMembers', 'status', 'isDraft'
+      'teamMembers', 'status', 'isDraft',
+      'courseCode', 'academicPeriod', 'teamSize', 'academicType'
     ]
 
     for (const field of allowedFields) {
