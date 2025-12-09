@@ -457,10 +457,31 @@ export function ProjectForm() {
       {/* Course/Module Information - Optional academic context */}
       <Card>
         <CardContent className="pt-6 space-y-4">
-          <h3 className="font-semibold">Course Information (Optional)</h3>
-          <p className="text-sm text-muted-foreground">
-            Add academic context to help others discover related projects
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Course Information (Optional)</h3>
+              <p className="text-sm text-muted-foreground">
+                Add academic context to help others discover related projects
+              </p>
+            </div>
+            {(courseCode || academicPeriod || teamSize || academicType) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCourseCode('')
+                  setAcademicPeriod('')
+                  setTeamSize('')
+                  setAcademicType('')
+                }}
+                disabled={isLoading}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear All
+              </Button>
+            )}
+          </div>
 
           {/* Course Code with Autocomplete */}
           <CourseCodeSelector
@@ -471,7 +492,19 @@ export function ProjectForm() {
 
           {/* Academic Period */}
           <div className="space-y-2">
-            <Label htmlFor="academicPeriod">Academic Period</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="academicPeriod">Academic Period</Label>
+              {academicPeriod && (
+                <button
+                  type="button"
+                  onClick={() => setAcademicPeriod('')}
+                  disabled={isLoading}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
             <Select
               value={academicPeriod}
               onValueChange={setAcademicPeriod}
@@ -493,7 +526,19 @@ export function ProjectForm() {
           {/* Team Size and Academic Type Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="teamSize">Team Size</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="teamSize">Team Size</Label>
+                {teamSize && (
+                  <button
+                    type="button"
+                    onClick={() => setTeamSize('')}
+                    disabled={isLoading}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
               <Select
                 value={teamSize}
                 onValueChange={(v) => setTeamSize(v as 'individual' | 'group')}
@@ -513,7 +558,19 @@ export function ProjectForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="academicType">Academic Type</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="academicType">Academic Type</Label>
+                {academicType && (
+                  <button
+                    type="button"
+                    onClick={() => setAcademicType('')}
+                    disabled={isLoading}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
               <Select
                 value={academicType}
                 onValueChange={setAcademicType}
