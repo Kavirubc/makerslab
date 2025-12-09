@@ -437,12 +437,16 @@ export function ProjectForm() {
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
               {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                <Badge key={tag} variant="secondary" className="flex items-center gap-1 pr-1">
                   {tag}
-                  <X
-                    className="h-3 w-3 cursor-pointer"
+                  <button
+                    type="button"
                     onClick={() => handleRemoveTag(tag)}
-                  />
+                    disabled={isLoading}
+                    className="ml-1 rounded-full hover:bg-muted p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
             </div>
