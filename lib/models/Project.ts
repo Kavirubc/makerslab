@@ -34,6 +34,12 @@ export interface Project {
   // Visibility
   isPublic: boolean
 
+  // Course/Module Tagging (optional academic context)
+  courseCode?: string // e.g., "SCS2201" or custom code
+  academicPeriod?: string // e.g., "2024/2025 Semester 1"
+  teamSize?: 'individual' | 'group'
+  academicType?: 'assignment' | 'capstone' | 'thesis' | 'research' | 'other'
+
   // Draft mode
   isDraft?: boolean // true = draft, false/undefined = published
   lastAutoSavedAt?: Date // timestamp for auto-save tracking
