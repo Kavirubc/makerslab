@@ -142,13 +142,16 @@ export async function checkEarlyAdopterBadge(
   const user = await db.collection<User>('users').findOne({ _id: userId })
   if (!user) return { awarded: false }
 
-  // Count total users created before or including this user
-  const userNumber = await db.collection<User>('users').countDocuments({
-    createdAt: { $lte: user.createdAt }
+  // Count total users created strictly before this user to determine position
+  const usersBeforeCount = await db.collection<User>('users').countDocuments({
+    createdAt: { $lt: user.createdAt }
   })
 
-  if (userNumber <= 100) {
-    const result = await awardBadge(db, userId, 'early-adopter', { userNumber })
+  // User's position is count + 1 (1-indexed)
+  const userPosition = usersBeforeCount + 1
+
+  if (userPosition <= 100) {
+    const result = await awardBadge(db, userId, 'early-adopter', { userNumber: userPosition })
     if (result.awarded) {
       return { awarded: true, badgeType: 'early-adopter' }
     }
