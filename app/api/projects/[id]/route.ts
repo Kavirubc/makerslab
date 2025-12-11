@@ -123,12 +123,13 @@ export async function PUT(
 
       // Check team player badge for team members who are registered users
       const teamMembers = body.teamMembers || project.teamMembers || []
-      for (const member of teamMembers) {
-        if (member.userId && ObjectId.isValid(member.userId)) {
-          const teamResult = await checkTeamPlayerBadge(db, new ObjectId(member.userId))
-          // Note: team member badge notifications handled separately
-        }
-      }
+      await Promise.all(
+        teamMembers
+          .filter(member => member.userId && ObjectId.isValid(member.userId))
+          .map(member =>
+            checkTeamPlayerBadge(db, new ObjectId(member.userId))
+          )
+      )
     }
 
     return NextResponse.json({
