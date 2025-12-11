@@ -283,14 +283,11 @@ export function ProjectForm() {
 
       const result = await response.json()
 
-      // Show badge notification if a new badge was earned
-      if (result.newBadge || (result.newBadges && result.newBadges.length > 0)) {
-        const badges = result.newBadges || [result.newBadge]
-        badges.forEach((badgeType: BadgeType) => {
-          if (badgeType) {
-            const badge = getBadgeDefinition(badgeType)
-            success(`🏆 Badge Earned: ${badge.name}!`)
-          }
+      // Show badge notification for earned badges
+      if (result.newBadges && result.newBadges.length > 0) {
+        result.newBadges.forEach((badgeType: BadgeType) => {
+          const badge = getBadgeDefinition(badgeType)
+          success(`🏆 Badge Earned: ${badge.name}!`)
         })
       }
 

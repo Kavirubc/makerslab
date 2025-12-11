@@ -116,15 +116,15 @@ export async function POST(request: NextRequest) {
     const result = await db.collection<Project>('projects').insertOne(newProject as Project)
 
     // Check for first project badge if this is a published (non-draft) project
-    let newBadge = null
+    const newBadges: string[] = []
     if (!isDraft) {
       const badgeResult = await checkFirstProjectBadge(
         db,
         new ObjectId(session.user.id),
         result.insertedId.toString()
       )
-      if (badgeResult.awarded) {
-        newBadge = badgeResult.badgeType
+      if (badgeResult.awarded && badgeResult.badgeType) {
+        newBadges.push(badgeResult.badgeType)
       }
     }
 
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       {
         message: 'Project created successfully',
         projectId: result.insertedId.toString(),
-        newBadge
+        newBadges: newBadges.length > 0 ? newBadges : null
       },
       { status: 201 }
     )
