@@ -97,7 +97,7 @@ export async function checkLovedCreatorBadge(
   // Sum all likes across user's projects using aggregation
   const result = await db.collection<Project>('projects').aggregate<{ totalLikes: number }>([
     { $match: { userId } },
-    { $group: { _id: null, totalLikes: { $sum: '$likes' } } }
+    { $group: { _id: null, totalLikes: { $sum: { $ifNull: ['$likes', 0] } } } }
   ]).toArray()
 
   const totalLikes = result[0]?.totalLikes || 0
