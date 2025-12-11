@@ -3,6 +3,7 @@ import { getDatabase } from '@/lib/mongodb'
 import { User } from '@/lib/models/User'
 import bcrypt from 'bcryptjs'
 import { getUniversityByEmailDomain } from '@/lib/utils/university'
+import { checkEarlyAdopterBadge } from '@/lib/utils/badges'
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,10 +75,14 @@ export async function POST(request: NextRequest) {
 
     const result = await usersCollection.insertOne(newUser as User)
 
+    // Check and award early adopter badge (first 100 users)
+    const badgeResult = await checkEarlyAdopterBadge(db, result.insertedId)
+
     return NextResponse.json(
       {
         message: 'User created successfully',
-        userId: result.insertedId.toString()
+        userId: result.insertedId.toString(),
+        newBadge: badgeResult.awarded ? badgeResult.badgeType : null
       },
       { status: 201 }
     )

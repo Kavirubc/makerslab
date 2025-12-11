@@ -3,6 +3,7 @@ import { getDatabase } from "@/lib/mongodb";
 import { User } from "@/lib/models/User";
 import { Project } from "@/lib/models/Project";
 import { University } from "@/lib/models/University";
+import { UserBadge } from "@/lib/models/UserBadge";
 import { ObjectId } from "mongodb";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ContributorBadge } from "@/components/contributor-badge";
+import { UserBadgesDisplay } from "@/components/user-badges-display";
 import {
   Mail,
   MapPin,
@@ -68,6 +70,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     .toArray();
 
   const totalViews = projects.reduce((sum, project) => sum + project.views, 0);
+
+  // Get user's badges
+  const userBadges = await db
+    .collection<UserBadge>("userBadges")
+    .find({ userId: new ObjectId(id) })
+    .sort({ awardedAt: -1 })
+    .toArray();
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
@@ -208,6 +217,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Badges Section */}
+          <UserBadgesDisplay
+            badges={userBadges.map((badge) => ({
+              badgeType: badge.badgeType,
+              awardedAt: badge.awardedAt,
+              metadata: badge.metadata,
+            }))}
+          />
 
           {/* Projects Section */}
           <div>
