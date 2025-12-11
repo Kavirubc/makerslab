@@ -34,9 +34,9 @@ export async function GET(
       { $inc: { views: 1 } }
     )
 
-    // Check for popular project badge at 100 views milestone
+    // Check for popular project badge at 100+ views milestone
     let ownerBadge: BadgeType | null = null
-    if (newViews === 100) {
+    if (newViews >= 100) {
       const badgeResult = await checkPopularProjectBadge(db, project.userId, id, newViews)
       if (badgeResult.awarded) {
         ownerBadge = badgeResult.badgeType || null
