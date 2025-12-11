@@ -35,9 +35,9 @@ export function UserBadgesDisplay({
   return (
     <div className={className}>
       <div className="flex items-center gap-2">
-        {badges.map((badge, index) => (
+        {badges.map((badge) => (
           <UserBadge
-            key={`${badge.badgeType}-${index}`}
+            key={badge.badgeType}
             badgeType={badge.badgeType}
             awardedAt={badge.awardedAt}
             size={size}
