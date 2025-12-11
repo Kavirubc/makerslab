@@ -122,6 +122,9 @@ export async function PUT(
       }
 
       // Check team player badge for team members who are registered users
+      // Note: Team member badges are awarded silently here. Team members see their
+      // badges on their profile page - no real-time notification is sent since they
+      // are not the current user making this request.
       const teamMembers: TeamMember[] = body.teamMembers || project.teamMembers || []
       await Promise.all(
         teamMembers
