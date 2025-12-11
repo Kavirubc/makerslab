@@ -216,7 +216,7 @@ export async function checkAllBadges(
       db,
       userId,
       popularProjects[0]._id!.toString(),
-      popularProjects[0].views
+      popularProjects[0].views || 0
     )
     if (popularResult.awarded && popularResult.badgeType) {
       newBadges.push(popularResult.badgeType)
