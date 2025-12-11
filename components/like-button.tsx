@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Heart } from 'lucide-react'
 import { useNotification } from '@/lib/hooks/use-notification'
-import { getBadgeDefinition } from '@/lib/constants/badges'
-import { BadgeType } from '@/lib/models/UserBadge'
 
 interface LikeButtonProps {
   projectId: string
@@ -84,12 +82,6 @@ export function LikeButton({
       const data = await response.json()
       setIsLiked(data.liked)
       setLikesCount(data.likesCount)
-
-      // Show badge notification if the project owner earned a badge
-      if (data.ownerNewBadge && data.ownerId === session.user.id) {
-        const badge = getBadgeDefinition(data.ownerNewBadge as BadgeType)
-        success(`🏆 Badge Earned: ${badge.name}!`)
-      }
 
       // Show success toast
       success(data.liked ? 'Project liked!' : 'Like removed')
