@@ -186,8 +186,8 @@ export async function checkAllBadges(
     .limit(1)
     .toArray()
 
-  if (projects.length > 0) {
-    const firstResult = await checkFirstProjectBadge(db, userId, projects[0]._id!.toString())
+  if (projects.length > 0 && projects[0]._id) {
+    const firstResult = await checkFirstProjectBadge(db, userId, projects[0]._id.toString())
     if (firstResult.awarded && firstResult.badgeType) {
       newBadges.push(firstResult.badgeType)
     }
@@ -211,11 +211,11 @@ export async function checkAllBadges(
     .limit(1)
     .toArray()
 
-  if (popularProjects.length > 0) {
+  if (popularProjects.length > 0 && popularProjects[0]._id) {
     const popularResult = await checkPopularProjectBadge(
       db,
       userId,
-      popularProjects[0]._id!.toString(),
+      popularProjects[0]._id.toString(),
       popularProjects[0].views || 0
     )
     if (popularResult.awarded && popularResult.badgeType) {
