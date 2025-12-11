@@ -4,6 +4,7 @@ import { getDatabase } from '@/lib/mongodb'
 import { ProjectLike } from '@/lib/models/ProjectLike'
 import { Project } from '@/lib/models/Project'
 import { ObjectId } from 'mongodb'
+import { checkLovedCreatorBadge } from '@/lib/utils/badges'
 
 // GET /api/projects/[id]/like - Check if user has liked the project
 export async function GET(
@@ -115,9 +116,14 @@ export async function POST(
       _id: projectId
     })
 
+    // Check if project owner earned the "loved creator" badge
+    const badgeResult = await checkLovedCreatorBadge(db, project.userId)
+
     return NextResponse.json({
       liked: true,
-      likesCount: updatedProject?.likes || 0
+      likesCount: updatedProject?.likes || 0,
+      ownerNewBadge: badgeResult.awarded ? badgeResult.badgeType : null,
+      ownerId: project.userId.toString()
     })
   } catch (error) {
     console.error('Error liking project:', error)

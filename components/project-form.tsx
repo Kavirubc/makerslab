@@ -25,6 +25,8 @@ import {
 } from '@/lib/firebase-client'
 import { useNotification } from '@/lib/hooks/use-notification'
 import { useAutoSave } from '@/lib/hooks/use-auto-save'
+import { getBadgeDefinition } from '@/lib/constants/badges'
+import { BadgeType } from '@/lib/models/UserBadge'
 
 const CATEGORIES = [
   'Web Development',
@@ -277,6 +279,16 @@ export function ProjectForm() {
       if (!response.ok) {
         const data = await response.json()
         throw new Error(data.error || 'Failed to publish project')
+      }
+
+      const result = await response.json()
+
+      // Show badge notification for earned badges
+      if (result.newBadges && result.newBadges.length > 0) {
+        result.newBadges.forEach((badgeType: BadgeType) => {
+          const badge = getBadgeDefinition(badgeType)
+          success(`🏆 Badge Earned: ${badge.name}!`)
+        })
       }
 
       success('Project published successfully!')

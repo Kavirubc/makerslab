@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { getDatabase } from '@/lib/mongodb'
 import { Project } from '@/lib/models/Project'
 import { ObjectId } from 'mongodb'
+import { checkFirstProjectBadge } from '@/lib/utils/badges'
 
 // GET /api/projects - Get user's own projects
 export async function GET(request: NextRequest) {
@@ -114,10 +115,24 @@ export async function POST(request: NextRequest) {
 
     const result = await db.collection<Project>('projects').insertOne(newProject as Project)
 
+    // Check for first project badge if this is a published (non-draft) project
+    const newBadges: string[] = []
+    if (!isDraft) {
+      const badgeResult = await checkFirstProjectBadge(
+        db,
+        new ObjectId(session.user.id),
+        result.insertedId.toString()
+      )
+      if (badgeResult.awarded && badgeResult.badgeType) {
+        newBadges.push(badgeResult.badgeType)
+      }
+    }
+
     return NextResponse.json(
       {
         message: 'Project created successfully',
-        projectId: result.insertedId.toString()
+        projectId: result.insertedId.toString(),
+        newBadges: newBadges.length > 0 ? newBadges : null
       },
       { status: 201 }
     )

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { getDatabase } from '@/lib/mongodb'
-import { Project } from '@/lib/models/Project'
+import { Project, TeamMember } from '@/lib/models/Project'
 import { ObjectId } from 'mongodb'
+import { checkPopularProjectBadge, checkFirstProjectBadge, checkTeamPlayerBadge } from '@/lib/utils/badges'
+import { BadgeType } from '@/lib/models/UserBadge'
 
 // GET /api/projects/[id] - Get a specific project
 export async function GET(
@@ -26,12 +28,26 @@ export async function GET(
     }
 
     // Increment view count
+    const newViews = (project.views || 0) + 1
     await db.collection<Project>('projects').updateOne(
       { _id: new ObjectId(id) },
       { $inc: { views: 1 } }
     )
 
-    return NextResponse.json({ project })
+    // Check for popular project badge at 100+ views milestone
+    let ownerBadge: BadgeType | null = null
+    if (newViews >= 100) {
+      const badgeResult = await checkPopularProjectBadge(db, project.userId, id, newViews)
+      if (badgeResult.awarded) {
+        ownerBadge = badgeResult.badgeType || null
+      }
+    }
+
+    return NextResponse.json({
+      project,
+      ownerBadge, // Badge earned by project owner (for notification)
+      ownerId: project.userId.toString()
+    })
   } catch (error) {
     console.error('Error fetching project:', error)
     return NextResponse.json(
@@ -90,7 +106,39 @@ export async function PUT(
       { $set: updateData }
     )
 
-    return NextResponse.json({ message: 'Project updated successfully' })
+    // Check for badges when publishing (transitioning from draft to published)
+    const newBadges: BadgeType[] = []
+    const isPublishing = project.isDraft === true && body.isDraft === false
+
+    if (isPublishing) {
+      // Check first project badge for the owner
+      const firstProjectResult = await checkFirstProjectBadge(
+        db,
+        new ObjectId(session.user.id),
+        id
+      )
+      if (firstProjectResult.awarded && firstProjectResult.badgeType) {
+        newBadges.push(firstProjectResult.badgeType)
+      }
+
+      // Check team player badge for team members who are registered users
+      // Note: Team member badges are awarded silently here. Team members see their
+      // badges on their profile page - no real-time notification is sent since they
+      // are not the current user making this request.
+      const teamMembers: TeamMember[] = body.teamMembers || project.teamMembers || []
+      await Promise.all(
+        teamMembers
+          .filter((member: TeamMember) => member.userId && ObjectId.isValid(member.userId))
+          .map((member: TeamMember) =>
+            checkTeamPlayerBadge(db, new ObjectId(member.userId!))
+          )
+      )
+    }
+
+    return NextResponse.json({
+      message: 'Project updated successfully',
+      newBadges: newBadges.length > 0 ? newBadges : null
+    })
   } catch (error) {
     console.error('Error updating project:', error)
     return NextResponse.json(

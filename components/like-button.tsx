@@ -82,6 +82,7 @@ export function LikeButton({
       const data = await response.json()
       setIsLiked(data.liked)
       setLikesCount(data.likesCount)
+
       // Show success toast
       success(data.liked ? 'Project liked!' : 'Like removed')
       router.refresh()

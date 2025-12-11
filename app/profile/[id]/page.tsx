@@ -3,6 +3,7 @@ import { getDatabase } from "@/lib/mongodb";
 import { User } from "@/lib/models/User";
 import { Project } from "@/lib/models/Project";
 import { University } from "@/lib/models/University";
+import { UserBadge } from "@/lib/models/UserBadge";
 import { ObjectId } from "mongodb";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ContributorBadge } from "@/components/contributor-badge";
+import { UserBadgesDisplay } from "@/components/user-badges-display";
 import {
   Mail,
   MapPin,
@@ -69,6 +71,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const totalViews = projects.reduce((sum, project) => sum + project.views, 0);
 
+  // Get user's badges
+  const userBadges = await db
+    .collection<UserBadge>("userBadges")
+    .find({ userId: new ObjectId(id) })
+    .sort({ awardedAt: -1 })
+    .toArray();
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -96,12 +105,23 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
                 <div className=" grow space-y-4">
                   <div>
-                    <div className="flex items-baseline gap-2 mb-2 flex-col md:flex-row md:items-center md:gap-3">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <h1 className="text-3xl font-bold">{user.name}</h1>
-                      {/* Contributor badge with glassy styling - aligned with name baseline */}
+                      {/* Contributor badge */}
                       {user.contributorType && (
                         <ContributorBadge
                           contributorType={user.contributorType}
+                        />
+                      )}
+                      {/* Achievement badges - circular icons */}
+                      {userBadges.length > 0 && (
+                        <UserBadgesDisplay
+                          badges={userBadges.map((badge) => ({
+                            badgeType: badge.badgeType,
+                            awardedAt: badge.awardedAt,
+                            metadata: badge.metadata,
+                          }))}
+                          size="sm"
                         />
                       )}
                     </div>
