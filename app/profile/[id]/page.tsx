@@ -105,12 +105,23 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
                 <div className=" grow space-y-4">
                   <div>
-                    <div className="flex items-baseline gap-2 mb-2 flex-col md:flex-row md:items-center md:gap-3">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <h1 className="text-3xl font-bold">{user.name}</h1>
-                      {/* Contributor badge with glassy styling - aligned with name baseline */}
+                      {/* Contributor badge */}
                       {user.contributorType && (
                         <ContributorBadge
                           contributorType={user.contributorType}
+                        />
+                      )}
+                      {/* Achievement badges - circular icons */}
+                      {userBadges.length > 0 && (
+                        <UserBadgesDisplay
+                          badges={userBadges.map((badge) => ({
+                            badgeType: badge.badgeType,
+                            awardedAt: badge.awardedAt,
+                            metadata: badge.metadata,
+                          }))}
+                          size="sm"
                         />
                       )}
                     </div>
@@ -217,15 +228,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </div>
             </CardContent>
           </Card>
-
-          {/* Badges Section */}
-          <UserBadgesDisplay
-            badges={userBadges.map((badge) => ({
-              badgeType: badge.badgeType,
-              awardedAt: badge.awardedAt,
-              metadata: badge.metadata,
-            }))}
-          />
 
           {/* Projects Section */}
           <div>
