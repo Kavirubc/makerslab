@@ -89,7 +89,7 @@ export async function checkPopularProjectBadge(
   return { awarded: false }
 }
 
-// Check and award "Loved Creator" badge (10+ total likes)
+// Check and award "Loved Creator" badge (10 or more total likes)
 export async function checkLovedCreatorBadge(
   db: Db,
   userId: ObjectId
@@ -111,7 +111,7 @@ export async function checkLovedCreatorBadge(
   return { awarded: false }
 }
 
-// Check and award "Team Player" badge (5 contributions)
+// Check and award "Team Player" badge (5 or more published projects as a team member)
 export async function checkTeamPlayerBadge(
   db: Db,
   userId: ObjectId
