@@ -43,6 +43,16 @@ const iconSizeClasses = {
   lg: 'h-6 w-6'
 }
 
+// Format award date for display
+function formatDate(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
 interface UserBadgeProps {
   badgeType: BadgeType
   awardedAt?: Date | string
@@ -62,16 +72,6 @@ export function UserBadge({
   const definition = getBadgeDefinition(badgeType)
   const Icon = iconMap[definition.icon] || Star
   const tooltipId = `badge-tooltip-${badgeType}`
-
-  // Format award date
-  const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
-  }
 
   return (
     <div className="relative group inline-block">
