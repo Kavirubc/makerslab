@@ -51,7 +51,7 @@ interface UserBadgeProps {
 }
 
 /**
- * Circular badge icon with hover tooltip
+ * Circular badge icon with hover/focus tooltip
  */
 export function UserBadge({
   badgeType,
@@ -61,6 +61,7 @@ export function UserBadge({
 }: UserBadgeProps) {
   const definition = getBadgeDefinition(badgeType)
   const Icon = iconMap[definition.icon] || Star
+  const tooltipId = `badge-tooltip-${badgeType}`
 
   // Format award date
   const formatDate = (date: Date | string) => {
@@ -74,26 +75,34 @@ export function UserBadge({
 
   return (
     <div className="relative group inline-block">
-      {/* Circular badge icon */}
+      {/* Circular badge icon - keyboard accessible */}
       <div
         className={cn(
           'flex items-center justify-center rounded-full border-2 backdrop-blur-md cursor-default transition-all duration-200',
+          'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
           colorSchemeClasses[definition.colorScheme],
           sizeClasses[size],
           className
         )}
+        tabIndex={0}
+        role="img"
+        aria-label={definition.name}
+        aria-describedby={tooltipId}
       >
-        <Icon className={iconSizeClasses[size]} />
+        <Icon className={iconSizeClasses[size]} aria-hidden="true" />
       </div>
 
-      {/* Tooltip - appears on hover */}
+      {/* Tooltip - appears on hover or focus */}
       <div
+        id={tooltipId}
+        role="tooltip"
         className={cn(
           'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-lg',
           'bg-popover/95 dark:bg-popover/95 backdrop-blur-sm',
           'border border-border shadow-xl',
           'pointer-events-none opacity-0 invisible scale-95',
           'group-hover:opacity-100 group-hover:visible group-hover:scale-100',
+          'group-focus-within:opacity-100 group-focus-within:visible group-focus-within:scale-100',
           'transition-all duration-200 z-50',
           'whitespace-nowrap text-center',
           // Arrow
