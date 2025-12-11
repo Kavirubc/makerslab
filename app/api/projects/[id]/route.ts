@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { getDatabase } from '@/lib/mongodb'
-import { Project } from '@/lib/models/Project'
+import { Project, TeamMember } from '@/lib/models/Project'
 import { ObjectId } from 'mongodb'
 import { checkPopularProjectBadge, checkFirstProjectBadge, checkTeamPlayerBadge } from '@/lib/utils/badges'
 import { BadgeType } from '@/lib/models/UserBadge'
@@ -122,12 +122,12 @@ export async function PUT(
       }
 
       // Check team player badge for team members who are registered users
-      const teamMembers = body.teamMembers || project.teamMembers || []
+      const teamMembers: TeamMember[] = body.teamMembers || project.teamMembers || []
       await Promise.all(
         teamMembers
-          .filter(member => member.userId && ObjectId.isValid(member.userId))
-          .map(member =>
-            checkTeamPlayerBadge(db, new ObjectId(member.userId))
+          .filter((member: TeamMember) => member.userId && ObjectId.isValid(member.userId))
+          .map((member: TeamMember) =>
+            checkTeamPlayerBadge(db, new ObjectId(member.userId!))
           )
       )
     }
