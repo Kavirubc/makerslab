@@ -40,6 +40,12 @@ export async function POST(
       )
     }
 
+    if (message.trim().length > 1000) {
+      return NextResponse.json(
+        { error: 'Message must be at most 1000 characters' },
+        { status: 400 }
+      )
+    }
     const db = await getDatabase()
 
     // Check if project exists
