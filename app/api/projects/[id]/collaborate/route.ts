@@ -40,6 +40,12 @@ export async function POST(
       )
     }
 
+    if (message.trim().length > 1000) {
+      return NextResponse.json(
+        { error: 'Message must be at most 1000 characters' },
+        { status: 400 }
+      )
+    }
     const db = await getDatabase()
 
     // Check if project exists
@@ -95,12 +101,44 @@ export async function POST(
       )
     }
 
+    // Normalize and validate skills
+    const MAX_SKILL_LENGTH = 100
+    const MAX_SKILLS = 20
+
+    const normalizedSkills: string[] = Array.isArray(skills)
+      ? skills
+          .map((s: unknown) =>
+            typeof s === 'string' ? s.trim() : ''
+          )
+          .filter((s: string) => s.length > 0)
+      : []
+
+    if (normalizedSkills.length > MAX_SKILLS) {
+      return NextResponse.json(
+        { error: `You can specify at most ${MAX_SKILLS} skills` },
+        { status: 400 }
+      )
+    }
+
+    const tooLongSkill = normalizedSkills.find(
+      (s: string) => s.length > MAX_SKILL_LENGTH
+    )
+
+    if (tooLongSkill) {
+      return NextResponse.json(
+        {
+          error: `Each skill must be at most ${MAX_SKILL_LENGTH} characters long`
+        },
+        { status: 400 }
+      )
+    }
+
     // Create collaboration request
     const newRequest: Omit<ProjectCollaborationRequest, '_id'> = {
       projectId: new ObjectId(id),
       requesterId: new ObjectId(session.user.id),
       message: message.trim(),
-      skills: skills.filter((s: string) => s.trim().length > 0),
+      skills: normalizedSkills,
       status: 'pending',
       createdAt: new Date(),
       updatedAt: new Date()

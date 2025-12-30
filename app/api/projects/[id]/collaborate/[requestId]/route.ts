@@ -94,28 +94,47 @@ export async function PATCH(
 
     // If accepted, add user to team
     if (action === 'accept') {
-      const requester = await db.collection<User>('users').findOne({
-        _id: collaborationRequest.requesterId
-      })
+      try {
+        const requester = await db.collection<User>('users').findOne({
+          _id: collaborationRequest.requesterId
+        })
 
-      if (requester) {
-        await db.collection<Project>('projects').updateOne(
-          { _id: new ObjectId(id) },
-          {
-            $push: {
-              teamMembers: {
-                name: requester.name,
-                email: requester.email,
-                role: 'Collaborator',
-                indexNumber: requester.indexNumber,
-                userId: requester._id?.toString()
+        if (requester) {
+          await db.collection<Project>('projects').updateOne(
+            { _id: new ObjectId(id) },
+            {
+              $push: {
+                teamMembers: {
+                  name: requester.name,
+                  email: requester.email,
+                  role: 'Collaborator',
+                  indexNumber: requester.indexNumber,
+                  userId: requester._id?.toString()
+                }
+              },
+              $set: {
+                updatedAt: now
               }
-            },
-            $set: {
-              updatedAt: now
             }
-          }
-        )
+          )
+        }
+      } catch (error) {
+        // Roll back the request status update if adding the user to the team fails
+        await db
+          .collection<ProjectCollaborationRequest>('projectCollaborationRequests')
+          .updateOne(
+            { _id: new ObjectId(requestId) },
+            {
+              $set: {
+                status: collaborationRequest.status,
+                reviewedBy: collaborationRequest.reviewedBy ?? null,
+                reviewerNote: collaborationRequest.reviewerNote ?? null,
+                reviewedAt: collaborationRequest.reviewedAt ?? null,
+                updatedAt: collaborationRequest.updatedAt ?? collaborationRequest.createdAt
+              }
+            }
+          )
+        throw error
       }
     }
 
