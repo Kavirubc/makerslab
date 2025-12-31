@@ -15,13 +15,17 @@ import { useState } from "react";
 interface PortfolioLinkCardProps {
   userId: string;
   portfolioUrl: string;
+  slug?: string | null; // Custom slug for contributors
 }
 
 export function PortfolioLinkCard({
   userId,
   portfolioUrl,
+  slug,
 }: PortfolioLinkCardProps) {
   const [copied, setCopied] = useState(false);
+  // Use slug-based URL if available
+  const profilePath = slug ? `/profile/${slug}` : `/profile/${userId}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(portfolioUrl);
@@ -61,7 +65,7 @@ export function PortfolioLinkCard({
             </Button>
           </div>
           <Link
-            href={`/profile/${userId}`}
+            href={profilePath}
             target="_blank"
             className="w-full block md:w-fit"
           >

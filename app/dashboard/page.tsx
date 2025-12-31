@@ -12,6 +12,7 @@ import { PortfolioLinkCard } from "@/components/portfolio-link-card";
 import { getDatabase } from "@/lib/mongodb";
 import { Project } from "@/lib/models/Project";
 import { ProjectLike } from "@/lib/models/ProjectLike";
+import { User } from "@/lib/models/User";
 import { ObjectId } from "mongodb";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,13 @@ export default async function Dashboard() {
 
   const db = await getDatabase();
   const userId = new ObjectId(session.user.id);
+
+  // Get user's profile slug for custom URL
+  const currentUser = await db.collection<User>("users").findOne(
+    { _id: userId },
+    { projection: { profileSlug: 1 } }
+  );
+  const profileSlug = currentUser?.profileSlug || null;
 
   // Get stats
   const projectsCount = await db
@@ -148,7 +156,9 @@ export default async function Dashboard() {
       (host.includes("localhost") ? "http" : "https");
     baseUrl = `${protocol}://${host}`;
   }
-  const portfolioUrl = `${baseUrl}/profile/${session.user.id}`;
+  // Use custom slug for URL if available
+  const profileIdentifier = profileSlug || session.user.id;
+  const portfolioUrl = `${baseUrl}/profile/${profileIdentifier}`;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
@@ -164,6 +174,7 @@ export default async function Dashboard() {
         <PortfolioLinkCard
           userId={session.user.id}
           portfolioUrl={portfolioUrl}
+          slug={profileSlug}
         />
 
         {/* Drafts Section */}
