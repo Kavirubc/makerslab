@@ -41,7 +41,7 @@ const FeatureItem = ({
           }}
           maskType={undefined}
         >
-          <h1 className=" text-2xl lg:text-4xl text-balance font-semibold font-satoshi leading-[1.3]">
+          <h1 className=" text-2xl lg:text-4xl font-semibold font-satoshi leading-[1.3]">
             {data.title}
           </h1>
         </SplitTextComp>
@@ -57,7 +57,7 @@ const FeatureItem = ({
           variant="lines"
           maskType="lines"
         >
-          <p className=" text-balance">{data.description}</p>
+          <p className=" ">{data.description}</p>
         </SplitTextComp>
       </div>
       <div>{/* <Image src={data.imgSrc} alt={data.imgAlt} /> */}</div>
