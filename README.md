@@ -126,8 +126,8 @@ We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING
 
 - All commits must be signed (GPG or SSH)
 - Follow the [conventional commits](https://www.conventionalcommits.org/) format
-- Create feature branches from `main`
-- Submit pull requests targeting `main`
+- Create feature branches from `preview`
+- Submit pull requests targeting `preview` (not `main`)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on:
 - Commit signing setup (GPG/SSH)
