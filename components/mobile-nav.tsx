@@ -128,14 +128,6 @@ export function MobileNav({ session }: MobileNavProps) {
             </>
           ) : (
             <>
-              <Link href="/login" onClick={() => setOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/register" onClick={() => setOpen(false)}>
-                <Button className="w-full">Sign Up</Button>
-              </Link>
               <MobileLink href="/explore" onClick={() => setOpen(false)}>
                 <Compass className="h-5 w-5" />
                 Explore
@@ -144,6 +136,14 @@ export function MobileNav({ session }: MobileNavProps) {
                 <Award className="h-5 w-5" />
                 Contributors
               </MobileLink>
+              <Link href="/login" onClick={() => setOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/register" onClick={() => setOpen(false)}>
+                <Button className="w-full">Sign Up</Button>
+              </Link>
             </>
           )}
         </div>
