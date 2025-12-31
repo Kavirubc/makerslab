@@ -150,13 +150,15 @@ We follow a strict branching workflow to ensure stability.
 
 - **main**: Production-ready code. Do not push directly to main.
 
+- **preview**: Integration branch for testing. All PRs must target this branch.
+
 - **Feature/Fix Branches**: Where you do your work.
 
 **Workflow Rule:**
 
-1.  Create your branch off `main`.
+1.  Create your branch off `preview`.
 
-2.  Submit your Pull Request targeting `main`.
+2.  Submit your Pull Request targeting `preview` (not `main`).
 
 ---
 
@@ -228,7 +230,7 @@ The module or component affected (e.g., `api`, `ui`, `database`).
 
 ## 5. Pull Requests
 
-Every PR must give clear context so the reviewer understands the "why" and "what" without checking the code first. Ensure your PR targets `main`.
+Every PR must give clear context so the reviewer understands the "why" and "what" without checking the code first. Ensure your PR targets `preview` (not `main`).
 
 **PR Template:**
 
