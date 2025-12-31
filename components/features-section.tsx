@@ -2,23 +2,32 @@ import { FeaturesData } from "@/lib/site-data";
 import type { FeatureItemProps } from "@/lib/types";
 import Image from "next/image";
 import SplitTextComp from "./ui/split-text-comp";
+import { cn } from "@/lib/utils";
 
 export default function FeaturesSection() {
   return (
     <section className="section-wrapper">
       <div className="flex flex-col">
         {FeaturesData.map((feature, index) => (
-          <FeatureItem key={index} {...feature} />
+          <FeatureItem key={index} index={index} {...feature} />
         ))}
       </div>
     </section>
-  );
+  ); 
 }
 
-const FeatureItem = (data: FeatureItemProps) => {
+const FeatureItem = ({
+  index,
+  ...data
+}: FeatureItemProps & { index: number }) => {
   return (
-    <div className=" min-h-[40vh] grid md:grid-cols-2 gap-8 items-start p-8">
-      <div className="flex flex-col gap-4">
+    <div
+      className={cn(
+        " min-h-[40vh] grid md:grid-cols-2 gap-8 items-start p-8",
+        index === 1 ? "*:md:col-start-2" : ""
+      )}
+    >
+      <div className={`flex flex-col gap-4`}>
         <SplitTextComp
           ScrollTriggerEnable={true}
           animationProps={{
