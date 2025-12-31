@@ -16,6 +16,8 @@ import {
   validateCVFile
 } from '@/lib/firebase-client'
 import { useNotification } from '@/lib/hooks/use-notification'
+import { ProfileSlugEditor } from '@/components/profile-slug-editor'
+import { canChangeSlug, getDaysUntilSlugChange } from '@/lib/utils/slug'
 
 interface ProfileEditFormProps {
   user: {
@@ -28,6 +30,10 @@ interface ProfileEditFormProps {
     cvUpdatedAt?: string | null
     linkedin?: string | null
     github?: string | null
+    // Slug fields for contributors
+    profileSlug?: string | null
+    slugChangedAt?: string | null
+    contributorType?: 'contributor' | 'core-contributor' | null
   }
 }
 
@@ -254,6 +260,25 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Custom Profile URL - only shown for contributors */}
+      {user.contributorType && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <h3 className="font-semibold">Custom Profile URL</h3>
+            <p className="text-sm text-muted-foreground">
+              As a {user.contributorType === 'core-contributor' ? 'core contributor' : 'contributor'},
+              you can set a custom profile URL.
+            </p>
+            <ProfileSlugEditor
+              currentSlug={user.profileSlug || null}
+              canChange={canChangeSlug(user.slugChangedAt ? new Date(user.slugChangedAt) : null)}
+              daysUntilChange={getDaysUntilSlugChange(user.slugChangedAt ? new Date(user.slugChangedAt) : null)}
+              userId={user._id}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="pt-6 space-y-4">

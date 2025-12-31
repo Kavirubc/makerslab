@@ -3,6 +3,7 @@ import { getDatabase } from '@/lib/mongodb'
 import { User } from '@/lib/models/User'
 import { ObjectId } from 'mongodb'
 import { NextRequest, NextResponse } from 'next/server'
+import { canChangeSlug, getDaysUntilSlugChange } from '@/lib/utils/slug'
 
 export async function GET() {
   try {
@@ -22,7 +23,14 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json(user)
+    // Add computed slug fields for UI
+    const response = {
+      ...user,
+      canChangeSlug: canChangeSlug(user.slugChangedAt),
+      daysUntilSlugChange: getDaysUntilSlugChange(user.slugChangedAt)
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Profile fetch error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
