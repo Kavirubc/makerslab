@@ -5,6 +5,7 @@ import { Project } from "@/lib/models/Project";
 import { University } from "@/lib/models/University";
 import { UserBadge } from "@/lib/models/UserBadge";
 import { ObjectId } from "mongodb";
+import { isObjectId } from "@/lib/utils/slug";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -39,23 +40,27 @@ interface ProfilePageProps {
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { id } = await params;
-
-  if (!ObjectId.isValid(id)) {
-    notFound();
-  }
-
-  const session = await auth();
-  const isOwner = session?.user?.id === id;
-
   const db = await getDatabase();
 
-  const user = await db.collection<User>("users").findOne({
-    _id: new ObjectId(id),
-  });
+  // Lookup by ObjectId or by profile slug
+  let user: User | null = null;
+  if (isObjectId(id) && ObjectId.isValid(id)) {
+    user = await db.collection<User>("users").findOne({
+      _id: new ObjectId(id),
+    });
+  } else {
+    // Lookup by slug (case-insensitive)
+    user = await db.collection<User>("users").findOne({
+      profileSlug: id.toLowerCase(),
+    });
+  }
 
   if (!user) {
     notFound();
   }
+
+  const session = await auth();
+  const isOwner = session?.user?.id === user._id?.toString();
 
   // Get university info
   const university = await db.collection<University>("universities").findOne({
@@ -65,7 +70,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   // Get user's public projects
   const projects = await db
     .collection<Project>("projects")
-    .find({ userId: new ObjectId(id), isPublic: true })
+    .find({ userId: user._id, isPublic: true })
     .sort({ updatedAt: -1 })
     .toArray();
 
@@ -74,7 +79,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   // Get user's badges
   const userBadges = await db
     .collection<UserBadge>("userBadges")
-    .find({ userId: new ObjectId(id) })
+    .find({ userId: user._id })
     .sort({ awardedAt: -1 })
     .toArray();
 
