@@ -22,6 +22,8 @@ export interface User {
   bannedReason?: string | null // Reason for ban
   contributorType?: 'contributor' | 'core-contributor' | null // Contributor status
   contributedAt?: Date | null // When user became a contributor
+  profileSlug?: string | null // Custom profile URL slug (3-10 chars)
+  slugChangedAt?: Date | null // Last slug change timestamp (6-month cooldown)
   createdAt: Date
   updatedAt: Date
 }
@@ -47,6 +49,8 @@ export interface UserWithoutPassword extends Omit<User, 'password'> {
   bannedReason?: string | null
   contributorType?: 'contributor' | 'core-contributor' | null
   contributedAt?: Date | null
+  profileSlug?: string | null
+  slugChangedAt?: Date | null
   createdAt: Date
   updatedAt: Date
 }

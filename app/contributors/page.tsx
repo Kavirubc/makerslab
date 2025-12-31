@@ -18,6 +18,7 @@ interface Contributor {
   bio?: string | null
   contributorType: 'contributor' | 'core-contributor'
   contributedAt?: Date | null
+  profileSlug?: string | null
   university?: {
     name: string
     district: string
@@ -204,8 +205,11 @@ function ContributorCard({ contributor }: { contributor: Contributor }) {
             </div>
           </div>
 
-          {/* View Profile Button */}
-          <Link href={`/profile/${contributor._id}`} className="w-full mt-2">
+          {/* View Profile Button - use slug if available */}
+          <Link
+            href={`/profile/${contributor.profileSlug || contributor._id}`}
+            className="w-full mt-2"
+          >
             <Button variant="outline" className="w-full">
               View Profile
               <ExternalLink className="h-4 w-4 ml-2" />

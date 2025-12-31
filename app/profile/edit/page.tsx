@@ -38,7 +38,11 @@ export default async function EditProfilePage() {
       cv: user.cv || null,
       cvUpdatedAt: user.cvUpdatedAt?.toISOString() || null,
       linkedin: user.linkedin || null,
-      github: user.github || null
+      github: user.github || null,
+      // Slug data for contributors
+      profileSlug: user.profileSlug || null,
+      slugChangedAt: user.slugChangedAt?.toISOString() || null,
+      contributorType: user.contributorType || null
     }
 
     return (

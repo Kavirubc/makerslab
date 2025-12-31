@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
           bio: contributor.bio,
           contributorType: contributor.contributorType,
           contributedAt: contributor.contributedAt,
+          profileSlug: contributor.profileSlug || null,
           university: university
             ? {
                 name: university.name,
