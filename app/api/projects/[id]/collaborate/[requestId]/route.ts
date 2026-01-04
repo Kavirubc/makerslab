@@ -76,11 +76,14 @@ export async function PATCH(
     const now = new Date()
     const newStatus = action === 'accept' ? 'accepted' : 'rejected'
 
-    // Update the collaboration request
-    await db
+    // Use atomic update to prevent race conditions - only update if status is still pending
+    const updateResult = await db
       .collection<ProjectCollaborationRequest>('projectCollaborationRequests')
       .updateOne(
-        { _id: new ObjectId(requestId) },
+        { 
+          _id: new ObjectId(requestId),
+          status: 'pending' // Only update if still pending
+        },
         {
           $set: {
             status: newStatus,
@@ -92,6 +95,14 @@ export async function PATCH(
         }
       )
 
+    // Check if the update actually happened (prevents race condition)
+    if (updateResult.matchedCount === 0) {
+      return NextResponse.json(
+        { error: 'This request has already been reviewed' },
+        { status: 400 }
+      )
+    }
+
     // If accepted, add user to team
     if (action === 'accept') {
       try {
@@ -99,25 +110,67 @@ export async function PATCH(
           _id: collaborationRequest.requesterId
         })
 
-        if (requester) {
-          await db.collection<Project>('projects').updateOne(
-            { _id: new ObjectId(id) },
-            {
-              $push: {
-                teamMembers: {
-                  name: requester.name,
-                  email: requester.email,
-                  role: 'Collaborator',
-                  indexNumber: requester.indexNumber,
-                  userId: requester._id?.toString()
+        if (!requester) {
+          // Roll back the request status update if user doesn't exist
+          await db
+            .collection<ProjectCollaborationRequest>('projectCollaborationRequests')
+            .updateOne(
+              { _id: new ObjectId(requestId) },
+              {
+                $set: {
+                  status: 'pending',
+                  reviewedBy: null,
+                  reviewerNote: null,
+                  reviewedAt: null,
+                  updatedAt: collaborationRequest.updatedAt ?? collaborationRequest.createdAt
                 }
-              },
-              $set: {
-                updatedAt: now
               }
-            }
+            )
+          return NextResponse.json(
+            { error: 'Requester user not found' },
+            { status: 404 }
           )
         }
+
+        // Check if user is already a team member (prevent race condition)
+        const currentProject = await db.collection<Project>('projects').findOne({
+          _id: new ObjectId(id)
+        })
+
+        if (currentProject) {
+          const isAlreadyMember = currentProject.teamMembers.some(
+            member => member.userId === requester._id?.toString()
+          )
+
+          if (isAlreadyMember) {
+            // User is already a team member, don't add again but keep request as accepted
+            return NextResponse.json(
+              {
+                message: 'Request accepted successfully (user already in team)',
+                status: newStatus
+              },
+              { status: 200 }
+            )
+          }
+        }
+
+        await db.collection<Project>('projects').updateOne(
+          { _id: new ObjectId(id) },
+          {
+            $push: {
+              teamMembers: {
+                name: requester.name,
+                email: requester.email,
+                role: 'Collaborator',
+                indexNumber: requester.indexNumber,
+                userId: requester._id?.toString()
+              }
+            },
+            $set: {
+              updatedAt: now
+            }
+          }
+        )
       } catch (error) {
         // Roll back the request status update if adding the user to the team fails
         await db
@@ -126,10 +179,10 @@ export async function PATCH(
             { _id: new ObjectId(requestId) },
             {
               $set: {
-                status: collaborationRequest.status,
-                reviewedBy: collaborationRequest.reviewedBy ?? null,
-                reviewerNote: collaborationRequest.reviewerNote ?? null,
-                reviewedAt: collaborationRequest.reviewedAt ?? null,
+                status: 'pending',
+                reviewedBy: null,
+                reviewerNote: null,
+                reviewedAt: null,
                 updatedAt: collaborationRequest.updatedAt ?? collaborationRequest.createdAt
               }
             }

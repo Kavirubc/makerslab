@@ -144,17 +144,28 @@ export async function POST(
       updatedAt: new Date()
     }
 
-    const result = await db
-      .collection<ProjectCollaborationRequest>('projectCollaborationRequests')
-      .insertOne(newRequest as ProjectCollaborationRequest)
+    try {
+      const result = await db
+        .collection<ProjectCollaborationRequest>('projectCollaborationRequests')
+        .insertOne(newRequest as ProjectCollaborationRequest)
 
-    return NextResponse.json(
-      {
-        message: 'Collaboration request sent successfully',
-        requestId: result.insertedId
-      },
-      { status: 201 }
-    )
+      return NextResponse.json(
+        {
+          message: 'Collaboration request sent successfully',
+          requestId: result.insertedId
+        },
+        { status: 201 }
+      )
+    } catch (error: any) {
+      // Handle potential duplicate key error if user submitted twice simultaneously
+      if (error.code === 11000) {
+        return NextResponse.json(
+          { error: 'You already have a pending request for this project' },
+          { status: 400 }
+        )
+      }
+      throw error
+    }
   } catch (error) {
     console.error('Error creating collaboration request:', error)
     return NextResponse.json(

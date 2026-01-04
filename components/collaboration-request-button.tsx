@@ -52,6 +52,7 @@ export function CollaborationRequestButton({
   const [skillInput, setSkillInput] = useState('')
   const [skills, setSkills] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
   const [requestStatus, setRequestStatus] = useState<CollaborationRequestStatus | null>(null)
   const [isLoadingStatus, setIsLoadingStatus] = useState(false)
 
@@ -147,8 +148,9 @@ export function CollaborationRequestButton({
   }
 
   const handleCancelRequest = async () => {
-    if (!requestStatus?.request?._id) return
+    if (!requestStatus?.request?._id || isCancelling) return
 
+    setIsCancelling(true)
     try {
       const response = await fetch(
         `/api/projects/${projectId}/collaborate/${requestStatus.request._id}`,
@@ -169,6 +171,8 @@ export function CollaborationRequestButton({
     } catch (error) {
       console.error('Error cancelling request:', error)
       toast.error('Failed to cancel request')
+    } finally {
+      setIsCancelling(false)
     }
   }
 
@@ -203,9 +207,17 @@ export function CollaborationRequestButton({
                 variant="outline"
                 size="sm"
                 onClick={handleCancelRequest}
+                disabled={isCancelling}
                 className="text-xs"
               >
-                Cancel Request
+                {isCancelling ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    Cancelling...
+                  </>
+                ) : (
+                  'Cancel Request'
+                )}
               </Button>
             </div>
           </div>
@@ -262,11 +274,12 @@ export function CollaborationRequestButton({
         variant="default"
         className="w-full"
         onClick={() => setDialogOpen(true)}
+        disabled={isSubmitting}
       >
         <UserPlus className="h-4 w-4 mr-2" />
         Join Team
       </Button>
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(open) => !isSubmitting && setDialogOpen(open)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Request to Join Team</DialogTitle>
