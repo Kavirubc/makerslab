@@ -75,6 +75,7 @@ export function CollaborationRequestsManager({
   const [reviewAction, setReviewAction] = useState<'accept' | 'reject'>('accept')
   const [reviewerNote, setReviewerNote] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [processingRequests, setProcessingRequests] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetchRequests()
@@ -97,6 +98,7 @@ export function CollaborationRequestsManager({
   }
 
   const openReviewDialog = (request: CollaborationRequest, action: 'accept' | 'reject') => {
+    if (processingRequests.has(request._id)) return
     setSelectedRequest(request)
     setReviewAction(action)
     setReviewerNote('')
@@ -104,9 +106,10 @@ export function CollaborationRequestsManager({
   }
 
   const handleReviewRequest = async () => {
-    if (!selectedRequest) return
+    if (!selectedRequest || processingRequests.has(selectedRequest._id)) return
 
     setIsSubmitting(true)
+    setProcessingRequests(prev => new Set(prev).add(selectedRequest._id))
     try {
       const response = await fetch(
         `/api/projects/${projectId}/collaborate/${selectedRequest._id}`,
@@ -141,6 +144,11 @@ export function CollaborationRequestsManager({
       toast.error('Failed to review request')
     } finally {
       setIsSubmitting(false)
+      setProcessingRequests(prev => {
+        const next = new Set(prev)
+        next.delete(selectedRequest._id)
+        return next
+      })
     }
   }
 
@@ -214,6 +222,7 @@ export function CollaborationRequestsManager({
                   request={request}
                   onAccept={() => openReviewDialog(request, 'accept')}
                   onReject={() => openReviewDialog(request, 'reject')}
+                  isProcessing={processingRequests.has(request._id)}
                 />
               ))}
             </div>
@@ -232,7 +241,7 @@ export function CollaborationRequestsManager({
         </CardContent>
       </Card>
 
-      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+      <Dialog open={reviewDialogOpen} onOpenChange={(open) => !isSubmitting && setReviewDialogOpen(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -306,9 +315,10 @@ interface RequestCardProps {
   onAccept?: () => void
   onReject?: () => void
   readOnly?: boolean
+  isProcessing?: boolean
 }
 
-function RequestCard({ request, onAccept, onReject, readOnly }: RequestCardProps) {
+function RequestCard({ request, onAccept, onReject, readOnly, isProcessing = false }: RequestCardProps) {
   const statusConfig = {
     pending: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400', label: 'Pending' },
     accepted: { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', label: 'Accepted' },
@@ -420,18 +430,37 @@ function RequestCard({ request, onAccept, onReject, readOnly }: RequestCardProps
 
       {!readOnly && request.status === 'pending' && (
         <div className="flex gap-2 pt-2">
-          <Button onClick={onAccept} className="flex-1" size="sm">
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Accept
+          <Button onClick={onAccept} className="flex-1" size="sm" disabled={isProcessing}>
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Accept
+              </>
+            )}
           </Button>
           <Button
             onClick={onReject}
             variant="outline"
             className="flex-1"
             size="sm"
+            disabled={isProcessing}
           >
-            <XCircle className="h-4 w-4 mr-2" />
-            Decline
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <XCircle className="h-4 w-4 mr-2" />
+                Decline
+              </>
+            )}
           </Button>
         </div>
       )}
