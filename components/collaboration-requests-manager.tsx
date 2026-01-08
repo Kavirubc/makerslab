@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import {
   Card,
   CardContent,
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Avatar } from '@/components/ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
@@ -330,17 +331,13 @@ function RequestCard({ request, onAccept, onReject, readOnly, isProcessing = fal
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1">
           <Avatar className="h-10 w-10">
-            {request.requester.profilePicture ? (
-              <img
-                src={request.requester.profilePicture}
-                alt={request.requester.name}
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                {request.requester.name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <AvatarImage
+              src={request.requester.profilePicture}
+              alt={request.requester.name}
+            />
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+              {request.requester.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">

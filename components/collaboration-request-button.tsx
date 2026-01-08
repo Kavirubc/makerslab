@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import {
@@ -61,13 +61,7 @@ export function CollaborationRequestButton({
     session?.user &&
     session.user.id !== projectOwnerId
 
-  useEffect(() => {
-    if (shouldShow) {
-      fetchRequestStatus()
-    }
-  }, [shouldShow, projectId])
-
-  const fetchRequestStatus = async () => {
+  const fetchRequestStatus = useCallback(async () => {
     setIsLoadingStatus(true)
     try {
       const response = await fetch(`/api/projects/${projectId}/collaborate/status`)
@@ -80,7 +74,13 @@ export function CollaborationRequestButton({
     } finally {
       setIsLoadingStatus(false)
     }
-  }
+  }, [projectId])
+
+  useEffect(() => {
+    if (shouldShow) {
+      fetchRequestStatus()
+    }
+  }, [shouldShow, fetchRequestStatus])
 
   const handleAddSkill = () => {
     const trimmedSkill = skillInput.trim()
@@ -94,7 +94,7 @@ export function CollaborationRequestButton({
     setSkills(skills.filter((skill) => skill !== skillToRemove))
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault()
       handleAddSkill()
@@ -316,7 +316,7 @@ export function CollaborationRequestButton({
                   placeholder="e.g., React, Node.js, UI/UX Design"
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                 />
                 <Button type="button" onClick={handleAddSkill} variant="outline">
                   Add
@@ -330,6 +330,7 @@ export function CollaborationRequestButton({
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
+                        aria-label={`Remove ${skill}`}
                         className="ml-2 hover:bg-muted rounded-full p-0.5"
                       >
                         <X className="h-3 w-3" />
