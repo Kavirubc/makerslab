@@ -5,6 +5,8 @@ import { User } from '@/lib/models/User'
 import { ObjectId } from 'mongodb'
 import { ProfileEditForm } from '@/components/profile-edit-form'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EditProfilePage() {
   try {
     const session = await auth()

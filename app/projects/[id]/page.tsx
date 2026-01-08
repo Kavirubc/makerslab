@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { VideoEmbed } from "@/components/video-embed";
 import { ReportProjectButton } from "@/components/report-project-button";
+import { CollaborationRequestButton } from "@/components/collaboration-request-button";
 import { LikeButton } from "@/components/like-button";
 import { ShareButton } from "@/components/share-button";
 import ReactMarkdown from "react-markdown";
@@ -454,6 +455,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </div>
                 </div>
               )}
+
+              {/* Collaboration Request Button - For in-progress projects */}
+              <CollaborationRequestButton
+                projectId={id}
+                projectTitle={project.title}
+                projectOwnerId={project.userId.toString()}
+                projectStatus={project.status}
+              />
 
               {/* Report Button - Bottom of sidebar */}
               <ReportProjectButton
