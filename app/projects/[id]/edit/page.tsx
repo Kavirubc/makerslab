@@ -4,7 +4,6 @@ import { getDatabase } from '@/lib/mongodb'
 import { Project } from '@/lib/models/Project'
 import { ObjectId } from 'mongodb'
 import { ProjectEditForm } from '@/components/project-edit-form'
-import { CollaborationRequestsManager } from '@/components/collaboration-requests-manager'
 
 interface EditProjectPageProps {
   params: Promise<{
@@ -54,17 +53,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           <p className="text-muted-foreground">Update your project details</p>
         </div>
 
-        <div className="space-y-8">
-          <ProjectEditForm project={projectData} />
-          
-          {/* Show collaboration requests manager for in-progress projects */}
-          {project.status === 'in-progress' && (
-            <CollaborationRequestsManager
-              projectId={id}
-              projectTitle={project.title}
-            />
-          )}
-        </div>
+        <ProjectEditForm project={projectData} />
       </div>
     </div>
   )
